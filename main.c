@@ -7,17 +7,19 @@
 #include "main.h"
 #include "readCSVData.h"
 
-int main() {
+int main(int argc, char *argv[]) {
 
     FILE *CSVData;
-    char **watchtowersStringsArray
-    watchtowerData *watchtowersStructsArray;
+    char **watchtowerStringArray;
+    watchtowerData *watchtowerStructArray;
 
-    CSVData = fopen(argv[0], r);
-    watchtowersStringsArray = readCSVData(CSVData)
-
+    CSVData = fopen(argv[1], "r");
+    watchtowerStringArray = readCSVData(CSVData, watchtowerStringArray);
+    //watchtowerStructArray =
 
     printf("program finished");
     return 0;
 }
+
+
 
