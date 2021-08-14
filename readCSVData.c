@@ -65,7 +65,12 @@ watchtowerData *readWatchtowerStringArray(char **watchtowerStringArray, watchtow
             watchtowerStructArray = (watchtowerData*)realloc(watchtowerStructArray, sizeof(watchtowerData) * arraySize);
         }
 
-        // hardcode storing of each cell into corresponding struct variables
+        /*
+         * hardcode storing of each cell into corresponding struct variables;
+         * seems as though some level of hard coding is required to store cell
+         * data into the struct, without significantly more complex code such as
+         * a 2D matrix and array of dictionaries with constant keys
+        */
 
         cellBuffer = strtok(watchtowerStringArray[i], CELL_DELIM);
         watchtowerStructArray[i].watchtowerID = (char*)malloc(sizeof(char) * (strlen(cellBuffer) + 1));
