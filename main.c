@@ -10,12 +10,17 @@
 int main(int argc, char *argv[]) {
 
     FILE *CSVData;
+    int numWatchtowers;
     char **watchtowerStringArray;
     watchtowerData *watchtowerStructArray;
 
     CSVData = fopen(argv[1], "r");
     watchtowerStringArray = readCSVData(CSVData, watchtowerStringArray);
-    //watchtowerStructArray =
+    watchtowerStructArray = readWatchtowerStringArray(watchtowerStringArray, watchtowerStructArray, &numWatchtowers);
+
+    for (int i=0; i<numWatchtowers; i++) {
+        printWatchtowerStruct(&watchtowerStructArray[i]);
+    }
 
     printf("program finished");
     return 0;
