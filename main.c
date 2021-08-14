@@ -11,9 +11,10 @@ int main(int argc, char *argv[]) {
 
     FILE *CSVData;
     int numWatchtowers;
-    char **watchtowerStringArray;
-    watchtowerData *watchtowerStructArray;
+    char **watchtowerStringArray = NULL;
+    watchtowerData *watchtowerStructArray = NULL;
 
+    // read CSV and store watchtower data into array of structs
     CSVData = fopen(argv[1], "r");
     watchtowerStringArray = readCSVData(CSVData, watchtowerStringArray);
     watchtowerStructArray = readWatchtowerStringArray(watchtowerStringArray, watchtowerStructArray, &numWatchtowers);
