@@ -7,45 +7,42 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "readCSVData.h"
+#include "readInputData.h"
 
 #define CELL_DELIM ","
 #define LINE_BUFFER_SIZE 512
 #define INIT_ARRAY_SIZE 16
 
 char**
-readCSVData(FILE *watchtowerCSV, char **watchtowerStringArray) {
+readTextData(FILE *text, char **stringArray) {
 
     int i;
     char lineBuffer[LINE_BUFFER_SIZE + 1];
     size_t arraySize = INIT_ARRAY_SIZE;
 
-    // allocate memory for array of csv records as stringsw
-    watchtowerStringArray = (char**)malloc(sizeof(char*) * arraySize);
-    assert(watchtowerStringArray);
+    // allocate memory for array of strings
+    stringArray = (char**)malloc(sizeof(char*) * arraySize);
+    assert(stringArray);
 
-    // dumping the csv header
-    fgets(lineBuffer, LINE_BUFFER_SIZE + 1, watchtowerCSV);
-
-    // storing each record in the csv as a string
-    for (i=0; fgets(lineBuffer, LINE_BUFFER_SIZE + 1, watchtowerCSV) != NULL; i++) {
+    // storing each line in the text as a string
+    for (i=0; fgets(lineBuffer, LINE_BUFFER_SIZE + 1, text) != NULL; i++) {
 
         // allocate more memory if needed
         if (i == arraySize - 1) {
             arraySize *= 2;
-            watchtowerStringArray = (char**)realloc(watchtowerStringArray, sizeof(char*) * arraySize);
+            stringArray = (char**)realloc(stringArray, sizeof(char*) * arraySize);
         }
 
         // dynamically allocate memory for each string and store in array
-        watchtowerStringArray[i] = (char*)malloc(sizeof(char) * (strlen(lineBuffer) + 1));
-        assert(watchtowerStringArray[i]);
-        strcpy(watchtowerStringArray[i], lineBuffer);
+        stringArray[i] = (char*)malloc(sizeof(char) * (strlen(lineBuffer) + 1));
+        assert(stringArray[i]);
+        strcpy(stringArray[i], lineBuffer);
     }
 
     // set NULL pointer to signify end of array
-    watchtowerStringArray[i] = NULL;
+    stringArray[i] = NULL;
 
-    return watchtowerStringArray;
+    return stringArray;
 }
 
 watchtowerData**
@@ -55,14 +52,20 @@ readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData **watchto
     char *cellBuffer;
     size_t arraySize = INIT_ARRAY_SIZE;
 
-    // allocate memory for array of pointers tocsv records as struct
+    // allocate memory for array of pointers to csv records as structs
     watchtowerStructArray = (watchtowerData**)malloc(sizeof(watchtowerData*) * arraySize);
     assert(watchtowerStructArray);
 
+    // if string array is not empty, skip CSV header string
+    if (watchtowerStringArray[0] != NULL) {
+        watchtowerStringArray++;
+    }
+
+    // storing each record as a struct, ignoring the CSV header string
     for (i=0; watchtowerStringArray[i] != NULL; i++) {
 
         // allocate more memory if needed to array of struct pointers
-        if (i == arraySize - 1) {
+        if (i == arraySize) {
             arraySize *= 2;
             watchtowerStructArray = (watchtowerData**)realloc(watchtowerStructArray, sizeof(watchtowerData*) * arraySize);
         }
@@ -111,25 +114,25 @@ readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData **watchto
 
 void
 printWatchtowerStruct(watchtowerData *watchtowerStruct) {
-    printf("\n%s\n%s\n%d\n%s\n%lf\n%lf\n\n", watchtowerStruct->watchtowerID,
-           watchtowerStruct->postcode, watchtowerStruct->populationServed,
-           watchtowerStruct->watchtowerName, watchtowerStruct->longitude,
-           watchtowerStruct->latitude);
+    printf("%s\n%s\n%d\n%s\n%lf\n%lf\n\n", watchtowerStruct->watchtowerID
+           , watchtowerStruct->postcode, watchtowerStruct->populationServed
+           , watchtowerStruct->watchtowerName, watchtowerStruct->longitude
+           , watchtowerStruct->latitude);
 }
 
 void
-freeWatchtowerStringArray(char ***watchtowerStringArray) {
+freeStringArray(char ***stringArray) {
 
     int i;
 
     // free each string in array
-    for (i=0; (*watchtowerStringArray)[i] != NULL; i++) {
-        free((*watchtowerStringArray)[i]);
+    for (i=0; (*stringArray)[i] != NULL; i++) {
+        free((*stringArray)[i]);
     }
 
     // free string array and set pointer to NULL
-    free(*watchtowerStringArray);
-    *watchtowerStringArray = NULL;
+    free(*stringArray);
+    *stringArray = NULL;
 }
 
 void

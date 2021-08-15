@@ -16,8 +16,8 @@ typedef struct {
     double latitude;
 } watchtowerData;
 
-char **readCSVData(FILE *watchtowerCSV, char **watchtowerStringArray);
+char **readTextData(FILE *text, char **stringArray);
 watchtowerData **readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData **watchtowerStructArray);
 void printWatchtowerStruct(watchtowerData *watchtowerStruct);
-void freeWatchtowerStringArray(char ***watchtowerStringArray);
+void freeStringArray(char ***stringArray);
 void freeWatchtowerStructArray(watchtowerData ***watchtowerStructArray);
