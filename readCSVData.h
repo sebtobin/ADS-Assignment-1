@@ -19,3 +19,4 @@ typedef struct {
 char **readCSVData(FILE *watchtowerCSV, char **watchtowerStringArray);
 watchtowerData *readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData *watchtowerStructArray, int *numWatchtowers);
 void printWatchtowerStruct(watchtowerData *watchtowerStruct);
+void freeStringArray(char*** stringArray);

@@ -13,13 +13,14 @@
 #define CELL_BUFFER_SIZE 128
 #define INIT_ARRAY_SIZE 16
 
-char **readCSVData(FILE *watchtowerCSV, char **watchtowerStringArray) {
+char
+**readCSVData(FILE *watchtowerCSV, char **watchtowerStringArray) {
 
     int i;
     char lineBuffer[LINE_BUFFER_SIZE + 1];
     size_t arraySize = INIT_ARRAY_SIZE;
 
-    // allocate memory for array of csv records as strings
+    // allocate memory for array of csv records as stringsw
     watchtowerStringArray = (char**)malloc(sizeof(char*) * arraySize);
     assert(watchtowerStringArray);
 
@@ -47,7 +48,8 @@ char **readCSVData(FILE *watchtowerCSV, char **watchtowerStringArray) {
     return watchtowerStringArray;
 }
 
-watchtowerData *readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData *watchtowerStructArray, int *numWatchtowers) {
+watchtowerData
+*readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData *watchtowerStructArray, int *numWatchtowers) {
 
     int i;
     char *cellBuffer;
@@ -103,9 +105,23 @@ watchtowerData *readWatchtowerStringArray(char **watchtowerStringArray, watchtow
     return watchtowerStructArray;
 }
 
-void printWatchtowerStruct(watchtowerData *watchtowerStruct) {
+void
+printWatchtowerStruct(watchtowerData *watchtowerStruct) {
     printf("\n%s\n%s\n%d\n%s\n%lf\n%lf\n\n", watchtowerStruct->watchtowerID,
            watchtowerStruct->postcode, watchtowerStruct->populationServed,
            watchtowerStruct->watchtowerName, watchtowerStruct->longitude,
            watchtowerStruct->latitude);
+}
+
+void
+freeStringArray(char*** stringArray) {
+
+    int i;
+
+    for (i=0; (*stringArray)[i] != NULL; i++) {
+        free((*stringArray)[i]);
+    }
+
+    free(*stringArray);
+    *stringArray = NULL;
 }

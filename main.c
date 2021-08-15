@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
     CSVData = fopen(argv[1], "r");
     watchtowerStringArray = readCSVData(CSVData, watchtowerStringArray);
     watchtowerStructArray = readWatchtowerStringArray(watchtowerStringArray, watchtowerStructArray, &numWatchtowers);
+    freeStringArray(&watchtowerStringArray);
 
     for (int i=0; i<numWatchtowers; i++) {
         printWatchtowerStruct(&watchtowerStructArray[i]);
