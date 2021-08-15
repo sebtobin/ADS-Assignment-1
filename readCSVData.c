@@ -1,5 +1,6 @@
 /*
- *
+ * file containing functions for reading CSV with watchtower data and
+ * storing in an array of watchtower data structs
  */
 
 #include <stdio.h>
@@ -10,7 +11,6 @@
 
 #define CELL_DELIM ","
 #define LINE_BUFFER_SIZE 512
-#define CELL_BUFFER_SIZE 128
 #define INIT_ARRAY_SIZE 16
 
 char**
@@ -118,14 +118,34 @@ printWatchtowerStruct(watchtowerData *watchtowerStruct) {
 }
 
 void
-freeStringArray(char*** stringArray) {
+freeWatchtowerStringArray(char ***watchtowerStringArray) {
 
     int i;
 
-    for (i=0; (*stringArray)[i] != NULL; i++) {
-        free((*stringArray)[i]);
+    // free each string in array
+    for (i=0; (*watchtowerStringArray)[i] != NULL; i++) {
+        free((*watchtowerStringArray)[i]);
     }
 
-    free(*stringArray);
-    *stringArray = NULL;
+    // free string array and set pointer to NULL
+    free(*watchtowerStringArray);
+    *watchtowerStringArray = NULL;
+}
+
+void
+freeWatchtowerStructArray(watchtowerData ***watchtowerStructArray) {
+
+    int i;
+
+    // free each struct pointer and strings within
+    for (i=0; (*watchtowerStructArray)[i] != NULL; i++) {
+        free((*watchtowerStructArray)[i]->watchtowerID);
+        free((*watchtowerStructArray)[i]->postcode);
+        free((*watchtowerStructArray)[i]->watchtowerName);
+        free((*watchtowerStructArray)[i]);
+    }
+
+    // free struct array and set pointer to NULL
+    free(*watchtowerStructArray);
+    *watchtowerStructArray = NULL;
 }

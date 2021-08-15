@@ -17,13 +17,19 @@ int main(int argc, char *argv[]) {
     CSVData = fopen(argv[1], "r");
     watchtowerStringArray = readCSVData(CSVData, watchtowerStringArray);
     watchtowerStructArray = readWatchtowerStringArray(watchtowerStringArray, watchtowerStructArray);
-    freeStringArray(&watchtowerStringArray);
+
+    // freeing strings and string array
+    freeWatchtowerStringArray(&watchtowerStringArray);
 
     for (int i=0; watchtowerStructArray[i] != NULL; i++) {
         printWatchtowerStruct(watchtowerStructArray[i]);
     }
 
+    // freeing struct array
+    freeWatchtowerStructArray(&watchtowerStructArray);
+
     printf("program finished");
+
     return 0;
 }
 
