@@ -1,7 +1,7 @@
 # Makefile
 
-main: main.o readCSVData.o
-	gcc -Wall -o main main.o readCSVData.o
+voronoi1: main.o readCSVData.o
+	gcc -Wall -o voronoi1 main.o readCSVData.o
 
 main.o: main.c main.h readCSVData.h dcel.h
 	gcc -Wall -o main.o main.c -c
