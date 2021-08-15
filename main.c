@@ -7,6 +7,7 @@
 #include "main.h"
 #include "readInputData.h"
 
+/* main function for the assignment */
 int
 main(int argc, char *argv[]) {
 

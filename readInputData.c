@@ -1,6 +1,5 @@
-/*
- * file containing functions for reading CSV with watchtower data and
- * storing in an array of watchtower data structs
+/* file containing functions for reading text and storing as an
+ * array of strings to be then stored in specialised structures
  */
 
 #include <stdio.h>
@@ -13,6 +12,7 @@
 #define LINE_BUFFER_SIZE 512
 #define INIT_ARRAY_SIZE 16
 
+/* read a file and store each line as a string in an array */
 char**
 readTextData(FILE *text, char **stringArray) {
 
@@ -45,6 +45,9 @@ readTextData(FILE *text, char **stringArray) {
     return stringArray;
 }
 
+/* read an array of strings, with each string being a CSV record
+ * and store each string in a watchtowerData struct
+ */
 watchtowerData**
 readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData **watchtowerStructArray) {
 
@@ -75,8 +78,7 @@ readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData **watchto
         watchtowerStructArray[i] = (watchtowerData*)malloc(sizeof(watchtowerData));
         assert(watchtowerStructArray[i]);
 
-        /*
-         * hardcode storing of each cell into corresponding struct variables;
+        /* hardcode storing of each cell into corresponding struct variables;
          * seems as though some level of hard coding is required to store cell
          * data into the struct, without significantly more complex code such as
          * a 2D matrix and array of dictionaries with constant keys
@@ -113,6 +115,7 @@ readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData **watchto
     return watchtowerStructArray;
 }
 
+/* print out the contents of the watchtowerData struct */
 void
 printWatchtowerStruct(watchtowerData *watchtowerStruct) {
     printf("%s\n%s\n%d\n%s\n%lf\n%lf\n\n", watchtowerStruct->watchtowerID
@@ -121,6 +124,7 @@ printWatchtowerStruct(watchtowerData *watchtowerStruct) {
            , watchtowerStruct->latitude);
 }
 
+/* free all the strings in an array, then the array itself */
 void
 freeStringArray(char ***stringArray) {
 
@@ -136,6 +140,9 @@ freeStringArray(char ***stringArray) {
     *stringArray = NULL;
 }
 
+/* free all the strings in the watchtowerData structs in an array,
+ * the structs and then the array itself
+ */
 void
 freeWatchtowerStructArray(watchtowerData ***watchtowerStructArray) {
 
