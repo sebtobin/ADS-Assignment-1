@@ -13,8 +13,8 @@
 #define CELL_BUFFER_SIZE 128
 #define INIT_ARRAY_SIZE 16
 
-char
-**readCSVData(FILE *watchtowerCSV, char **watchtowerStringArray) {
+char**
+readCSVData(FILE *watchtowerCSV, char **watchtowerStringArray) {
 
     int i;
     char lineBuffer[LINE_BUFFER_SIZE + 1];
@@ -31,7 +31,7 @@ char
     for (i=0; fgets(lineBuffer, LINE_BUFFER_SIZE + 1, watchtowerCSV) != NULL; i++) {
 
         // allocate more memory if needed
-        if (i == arraySize) {
+        if (i == arraySize - 1) {
             arraySize *= 2;
             watchtowerStringArray = (char**)realloc(watchtowerStringArray, sizeof(char*) * arraySize);
         }
@@ -48,24 +48,28 @@ char
     return watchtowerStringArray;
 }
 
-watchtowerData
-*readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData *watchtowerStructArray, int *numWatchtowers) {
+watchtowerData**
+readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData **watchtowerStructArray) {
 
     int i;
     char *cellBuffer;
     size_t arraySize = INIT_ARRAY_SIZE;
 
-    // allocate memory for array of csv records as structs
-    watchtowerStructArray = (watchtowerData*)malloc(sizeof(watchtowerData) * arraySize);
+    // allocate memory for array of pointers tocsv records as struct
+    watchtowerStructArray = (watchtowerData**)malloc(sizeof(watchtowerData*) * arraySize);
     assert(watchtowerStructArray);
 
     for (i=0; watchtowerStringArray[i] != NULL; i++) {
 
-        // allocate more memory if needed
-        if (i == arraySize) {
+        // allocate more memory if needed to array of struct pointers
+        if (i == arraySize - 1) {
             arraySize *= 2;
-            watchtowerStructArray = (watchtowerData*)realloc(watchtowerStructArray, sizeof(watchtowerData) * arraySize);
+            watchtowerStructArray = (watchtowerData**)realloc(watchtowerStructArray, sizeof(watchtowerData*) * arraySize);
         }
+
+        // allocate memory to current watchtower struct pointer
+        watchtowerStructArray[i] = (watchtowerData*)malloc(sizeof(watchtowerData));
+        assert(watchtowerStructArray[i]);
 
         /*
          * hardcode storing of each cell into corresponding struct variables;
@@ -75,32 +79,32 @@ watchtowerData
         */
 
         cellBuffer = strtok(watchtowerStringArray[i], CELL_DELIM);
-        watchtowerStructArray[i].watchtowerID = (char*)malloc(sizeof(char) * (strlen(cellBuffer) + 1));
-        assert(watchtowerStructArray[i].watchtowerID);
-        strcpy(watchtowerStructArray[i].watchtowerID, cellBuffer);
+        watchtowerStructArray[i]->watchtowerID = (char*)malloc(sizeof(char) * (strlen(cellBuffer) + 1));
+        assert(watchtowerStructArray[i]->watchtowerID);
+        strcpy(watchtowerStructArray[i]->watchtowerID, cellBuffer);
 
         cellBuffer = strtok(NULL, CELL_DELIM);
-        watchtowerStructArray[i].postcode = (char*)malloc(sizeof(char) * (strlen(cellBuffer) + 1));
-        assert(watchtowerStructArray[i].postcode);
-        strcpy(watchtowerStructArray[i].postcode, cellBuffer);
+        watchtowerStructArray[i]->postcode = (char*)malloc(sizeof(char) * (strlen(cellBuffer) + 1));
+        assert(watchtowerStructArray[i]->postcode);
+        strcpy(watchtowerStructArray[i]->postcode, cellBuffer);
 
         cellBuffer = strtok(NULL, CELL_DELIM);
-        watchtowerStructArray[i].populationServed = atoi(cellBuffer);
+        watchtowerStructArray[i]->populationServed = atoi(cellBuffer);
 
         cellBuffer = strtok(NULL, CELL_DELIM);
-        watchtowerStructArray[i].watchtowerName = (char*)malloc(sizeof(char) * (strlen(cellBuffer) + 1));
-        assert(watchtowerStructArray[i].watchtowerName);
-        strcpy(watchtowerStructArray[i].watchtowerName, cellBuffer);
+        watchtowerStructArray[i]->watchtowerName = (char*)malloc(sizeof(char) * (strlen(cellBuffer) + 1));
+        assert(watchtowerStructArray[i]->watchtowerName);
+        strcpy(watchtowerStructArray[i]->watchtowerName, cellBuffer);
 
         cellBuffer = strtok(NULL, CELL_DELIM);
-        watchtowerStructArray[i].longitude = strtod(cellBuffer, NULL);
+        watchtowerStructArray[i]->longitude = strtod(cellBuffer, NULL);
 
         cellBuffer = strtok(NULL, CELL_DELIM);
-        watchtowerStructArray[i].latitude = strtod(cellBuffer, NULL);
+        watchtowerStructArray[i]->latitude = strtod(cellBuffer, NULL);
     }
 
-    // record number of watchtower structs in the array
-    *numWatchtowers = i;
+    // add null pointer to signify end of array
+    watchtowerStructArray[i] = NULL;
 
     return watchtowerStructArray;
 }

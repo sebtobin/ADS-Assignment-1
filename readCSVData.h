@@ -17,6 +17,6 @@ typedef struct {
 } watchtowerData;
 
 char **readCSVData(FILE *watchtowerCSV, char **watchtowerStringArray);
-watchtowerData *readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData *watchtowerStructArray, int *numWatchtowers);
+watchtowerData **readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData **watchtowerStructArray);
 void printWatchtowerStruct(watchtowerData *watchtowerStruct);
 void freeStringArray(char*** stringArray);
