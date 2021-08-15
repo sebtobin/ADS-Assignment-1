@@ -57,6 +57,7 @@ readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData **watchto
     assert(watchtowerStructArray);
 
     // if string array is not empty, skip CSV header string
+    // increment limited to local scope, so full string array can be accessed and freed later
     if (watchtowerStringArray[0] != NULL) {
         watchtowerStringArray++;
     }

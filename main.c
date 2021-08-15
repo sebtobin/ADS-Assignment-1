@@ -7,14 +7,13 @@
 #include "main.h"
 #include "readInputData.h"
 
-int main(int argc, char *argv[]) {
+int
+main(int argc, char *argv[]) {
 
     int i;
-    FILE *CSVData;
-    FILE *initPolygonData;
-    char **watchtowerStringArray = NULL;
+    char **watchtowerStringArray = NULL, **initPolygonStringArray = NULL;
+    FILE *CSVData, *initPolygonData;
     watchtowerData **watchtowerStructArray = NULL;
-    char **initPolygonStringArray = NULL;
 
     // print command line args
     printf("\nCommand Line Arguments:\n\n");
