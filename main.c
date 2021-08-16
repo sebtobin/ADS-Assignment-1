@@ -7,6 +7,7 @@
 #include "main.h"
 #include "readInputData.h"
 #include "watchtowerOps.h"
+#include "dcelOps.h"
 
 /* main function for the assignment */
 int
@@ -16,6 +17,7 @@ main(int argc, char *argv[]) {
     char **watchtowerStringArray = NULL, **initPolygonStringArray = NULL;
     FILE *CSVData, *initPolygonData;
     watchtowerData_t **watchtowerStructArray = NULL;
+    dcel_t dcel;
 
     // print command line args
     printf("\nCommand Line Arguments:\n\n");
@@ -36,23 +38,30 @@ main(int argc, char *argv[]) {
 
     watchtowerStructArray = readWatchtowerStringArray(watchtowerStringArray, watchtowerStructArray);
 
-    // freeing strings and string array
-    freeStringArray(&watchtowerStringArray);
-
-    initPolygonData = fopen(argv[2], "r");
-    initPolygonStringArray = readTextData(initPolygonData, initPolygonStringArray);
-
     // print struct variables of structs in watchtowerStructArray
     printf("Watchtower Structs:\n\n");
     for (i=0; watchtowerStructArray[i] != NULL; i++) {
         printWatchtowerStruct(watchtowerStructArray[i]);
     }
 
+    // freeing strings and string array
+    freeStringArray(&watchtowerStringArray);
+
+    initPolygonData = fopen(argv[2], "r");
+    initPolygonStringArray = readTextData(initPolygonData, initPolygonStringArray);
+    fclose(initPolygonData);
+
     // print strings in initPolygonStringArray
     printf("Initial Polygon Strings:\n\n");
     for (i=0; initPolygonStringArray[i]; i++) {
         printf("%s", initPolygonStringArray[i]);
     } printf("\n");
+
+    buildInitPolygon(initPolygonStringArray, &dcel);
+
+
+
+    printDcel(&dcel);
 
     // freeing struct array
     freeWatchtowerStructArray(&watchtowerStructArray);
