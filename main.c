@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "main.h"
 #include "readInputData.h"
+#include "watchtowerOps.h"
 
 /* main function for the assignment */
 int
@@ -14,7 +15,7 @@ main(int argc, char *argv[]) {
     int i;
     char **watchtowerStringArray = NULL, **initPolygonStringArray = NULL;
     FILE *CSVData, *initPolygonData;
-    watchtowerData **watchtowerStructArray = NULL;
+    watchtowerData_t **watchtowerStructArray = NULL;
 
     // print command line args
     printf("\nCommand Line Arguments:\n\n");
