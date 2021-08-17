@@ -19,3 +19,4 @@ typedef struct {
 watchtowerData_t **readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData_t **watchtowerStructArray);
 void printWatchtowerStruct(watchtowerData_t *watchtowerStruct);
 void freeWatchtowerStructArray(watchtowerData_t ***watchtowerStructArray);
+int numWatchtowers(watchtowerData_t **watchtowersArray);

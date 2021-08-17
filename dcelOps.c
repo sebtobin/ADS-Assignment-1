@@ -45,9 +45,9 @@ buildInitPolygon(char **initPolygonStringArray, dcel_t *dcel) {
             dcel->maxEdges *= 2;
             dcel->edgesArray = (edge_t*)realloc(dcel->edgesArray, sizeof(edge_t) * dcel->maxEdges);
         }
+
         dcel->verticesArray[i].xCoord = strtod(strtok(initPolygonStringArray[i], COORD_DELIM), NULL);
         dcel->verticesArray[i].yCoord = strtod(strtok(NULL, COORD_DELIM), NULL);
-
     }
 
     numVertices = i;
@@ -84,22 +84,39 @@ buildInitPolygon(char **initPolygonStringArray, dcel_t *dcel) {
 void
 printDcel(dcel_t *dcel) {
 
-    int i, startVertIndex;
-    halfEdge_t *curr;
+    int i;
 
     printf("\nDCEL Data:\n");
 
     for (i=0; dcel->facesArray[i].halfEdge != NULL; i++) {
-
-        curr = dcel->facesArray[i].halfEdge;
-        startVertIndex = curr->startVertIndex;
-        printf("\nFace index: %d\n\n", i);
-
-        do {
-            printf("Edge index: %d\n", curr->edgeIndex);
-            printf("Starting vertex index: %d\n", curr->startVertIndex);
-            printf("Ending vertex index: %d\n", curr->endVertIndex);
-            curr = curr->nextHalfEdge;
-        } while (curr->startVertIndex != startVertIndex);
+        printFace(dcel, i);
     }
 }
+
+void printFace(dcel_t* dcel, int faceIndex) {
+
+    halfEdge_t *curr = dcel->facesArray[faceIndex].halfEdge;
+    int startVertIndex = curr->startVertIndex;
+    printf("\nFace index: %d\n\n", faceIndex);
+
+    do {
+        printHalfEdge(dcel, curr);
+        curr = curr->nextHalfEdge;
+        printf("\n");
+    } while (curr->startVertIndex != startVertIndex);
+}
+
+void printHalfEdge(dcel_t *dcel, halfEdge_t *halfEdge) {
+    printf("Face index %d\n", halfEdge->faceIndex);
+    printf("Edge index: %d\n", halfEdge->edgeIndex);
+    printf("Starting "); printVertex(dcel, halfEdge->startVertIndex);
+    printf("Ending "); printVertex(dcel, halfEdge->endVertIndex);
+}
+
+void printVertex(dcel_t* dcel, int vertexIndex) {
+    printf("vertex x,y = %lf,%lf at index: %d\n",
+           dcel->verticesArray[vertexIndex].xCoord,
+           dcel->verticesArray[vertexIndex].yCoord,
+           vertexIndex);
+}
+

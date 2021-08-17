@@ -110,3 +110,11 @@ freeWatchtowerStructArray(watchtowerData_t ***watchtowerStructArray) {
     free(*watchtowerStructArray);
     *watchtowerStructArray = NULL;
 }
+
+int
+numWatchtowers(watchtowerData_t **watchtowersArray) {
+
+    int i;
+    for (i=0; watchtowersArray[i] != NULL; i++) {}
+    return i;
+}

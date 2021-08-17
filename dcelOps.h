@@ -42,4 +42,7 @@ typedef struct {
 dcel_t *buildInitPolygon(char **initPolygonStringArray, dcel_t *dcel);
 void initialiseDcel(dcel_t *dcel, int initArraySize);
 void printDcel(dcel_t *dcel);
+void printFace(dcel_t* dcel, int faceIndex);
+void printHalfEdge(dcel_t *dcel, halfEdge_t *halfEdge);
+void printVertex(dcel_t *dcel, int vertexIndex);
 

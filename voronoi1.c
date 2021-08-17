@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "main.h"
+#include "voronoi1.h"
 #include "readInputData.h"
 #include "watchtowerOps.h"
 #include "dcelOps.h"
@@ -43,6 +43,7 @@ main(int argc, char *argv[]) {
     for (i=0; watchtowerStructArray[i] != NULL; i++) {
         printWatchtowerStruct(watchtowerStructArray[i]);
     }
+    printf("Number of Watchtowers: %d\n\n", numWatchtowers(watchtowerStructArray));
 
     // freeing strings and string array
     freeStringArray(&watchtowerStringArray);
@@ -58,8 +59,6 @@ main(int argc, char *argv[]) {
     } printf("\n");
 
     buildInitPolygon(initPolygonStringArray, &dcel);
-
-
 
     printDcel(&dcel);
 
