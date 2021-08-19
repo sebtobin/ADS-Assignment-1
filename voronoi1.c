@@ -9,6 +9,8 @@
 #include "watchtowerOps.h"
 #include "dcelOps.h"
 
+#define INIT_ARRAY_SIZE 16
+
 /* main function for the assignment */
 int
 main(int argc, char *argv[]) {
@@ -58,7 +60,12 @@ main(int argc, char *argv[]) {
         printf("%s", initPolygonStringArray[i]);
     } printf("\n");
 
+    initialiseDcel(&dcel, INIT_ARRAY_SIZE);
     buildInitPolygon(initPolygonStringArray, &dcel);
+
+    printDcel(&dcel);
+
+    edgeSplit(&dcel, 2, 3);
 
     printDcel(&dcel);
 
