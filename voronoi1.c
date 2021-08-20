@@ -17,7 +17,6 @@ main(int argc, char *argv[]) {
     char **watchtowerStringArray = NULL, **initPolygonStringArray = NULL, **splitStringArray = NULL;
     FILE *CSVData, *initPolygonData;
     watchtowerData_t **watchtowerStructArray = NULL;
-    split_t **splitStructArray = NULL;
     dcel_t dcel;
 
     /*// print command line args
@@ -73,25 +72,12 @@ main(int argc, char *argv[]) {
     // print strings in splitStringArray
     printf("\n\nsplit strings:\n\n");
     for (i=0; splitStringArray[i]; i++) {
-        printf("%s\n", splitStringArray[i]);
+        printf("%s", splitStringArray[i]);
     }
 
-    // store polygon splits as structs, then free polygon split string array
-    splitStructArray = storeSplitStructs(splitStringArray, splitStructArray);
+    // execute splits then free split string array
+    executeSplits(&dcel, splitStringArray);
     freeStringArray(&splitStringArray);
-
-    printf("\nedge splits: \n\n");
-    for (i=0; splitStructArray[i] != NULL; i++) {
-        printf("edge split index: %d\n", i);
-        printSplitStruct(splitStructArray[i]);
-        printf("\n");
-    }
-
-    // execute splits
-    executeSplits(&dcel, splitStructArray);
-
-    // freeing split struct array
-    freeSplitStructArray(&splitStructArray);
 
     // freeing watchtower struct array
     freeWatchtowerStructArray(&watchtowerStructArray);
