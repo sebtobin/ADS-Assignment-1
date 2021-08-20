@@ -3,7 +3,7 @@
 voronoi1: voronoi1.o readInputData.o dcelOps.o watchtowerOps.o
 	gcc -Wall -o voronoi1 voronoi1.o readInputData.o dcelOps.o watchtowerOps.o
 
-voronoi1.o: voronoi1.c voronoi1.h readInputData.h dcelOps.h watchtowerOps.h
+voronoi1.o: voronoi1.c readInputData.h dcelOps.h watchtowerOps.h
 	gcc -Wall -o voronoi1.o voronoi1.c -c
 
 readInputData.o : readInputData.c readInputData.h

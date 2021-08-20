@@ -3,8 +3,6 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include "voronoi1.h"
 #include "readInputData.h"
 #include "watchtowerOps.h"
 #include "dcelOps.h"
@@ -16,60 +14,86 @@ int
 main(int argc, char *argv[]) {
 
     int i;
-    char **watchtowerStringArray = NULL, **initPolygonStringArray = NULL;
+    char **watchtowerStringArray = NULL, **initPolygonStringArray = NULL, **splitStringArray = NULL;
     FILE *CSVData, *initPolygonData;
     watchtowerData_t **watchtowerStructArray = NULL;
+    split_t **splitStructArray = NULL;
     dcel_t dcel;
 
-    // print command line args
-    printf("\nCommand Line Arguments:\n\n");
-    for (i=0; argv[i]; i++) {
+    /*// print command line args
+    printf("\ncommand line arguments:\n\n");
+    for (i=0; i<argc; i++) {
         printf("%s\n", argv[i]);
-    } printf("\n");
+    } printf("\n"); */
 
     // read CSV and store watchtower data into array of structs
     CSVData = fopen(argv[1], "r");
     watchtowerStringArray = readTextData(CSVData, watchtowerStringArray);
     fclose(CSVData);
 
-    // print strings in watchtowerStringsArray
-    printf("Watchtower Strings:\n\n");
+    /*// print strings in watchtowerStringsArray
+    printf("watchtower strings:\n\n");
     for (i=0; watchtowerStringArray[i]; i++) {
         printf("%s", watchtowerStringArray[i]);
-    } printf("\n");
+    }*/
 
-    watchtowerStructArray = readWatchtowerStringArray(watchtowerStringArray, watchtowerStructArray);
+    // store strings into watchtower structs and then free string array
+    watchtowerStructArray = storeWatchtowerStructs(watchtowerStringArray, watchtowerStructArray);
+    freeStringArray(&watchtowerStringArray);
 
-    // print struct variables of structs in watchtowerStructArray
-    printf("Watchtower Structs:\n\n");
+    /*// print struct variables of structs in watchtowerStructArray
+    printf("\nwatchtower structs:\n\n");
     for (i=0; watchtowerStructArray[i] != NULL; i++) {
         printWatchtowerStruct(watchtowerStructArray[i]);
     }
-    printf("Number of Watchtowers: %d\n\n", numWatchtowers(watchtowerStructArray));
+    printf("number of watchtowers: %d\n\n", numWatchtowers(watchtowerStructArray)); */
 
-    // freeing strings and string array
-    freeStringArray(&watchtowerStringArray);
-
+    // read initial polygon data and store in array of strings
     initPolygonData = fopen(argv[2], "r");
     initPolygonStringArray = readTextData(initPolygonData, initPolygonStringArray);
     fclose(initPolygonData);
 
+    /*
     // print strings in initPolygonStringArray
-    printf("Initial Polygon Strings:\n\n");
+    printf("initial polygon strings:\n\n");
     for (i=0; initPolygonStringArray[i]; i++) {
         printf("%s", initPolygonStringArray[i]);
-    } printf("\n");
+    }*/
 
+    // initialise DCEL and build initial polygon, then free polygon string array
     initialiseDcel(&dcel, INIT_ARRAY_SIZE);
     buildInitPolygon(initPolygonStringArray, &dcel);
+    freeStringArray(&initPolygonStringArray);
 
-    printDcel(&dcel);
+    //printDcel(&dcel);
 
-    edgeSplit(&dcel, 2, 3);
+    // read polygon splits into string array
+    splitStringArray = readTextData(stdin, splitStringArray);
 
-    printDcel(&dcel);
+    // print strings in splitStringArray
+    printf("\n\nsplit strings:\n\n");
+    for (i=0; splitStringArray[i]; i++) {
+        printf("%s\n", splitStringArray[i]);
+    }
 
-    // freeing struct array
+    // store polygon splits as structs, then free polygon split string array
+    splitStructArray = storeSplitStructs(splitStringArray, splitStructArray);
+    freeStringArray(&splitStringArray);
+
+    printf("\nedge splits: \n\n");
+    for (i=0; splitStructArray[i] != NULL; i++) {
+        printf("edge split index: %d\n", i);
+        printSplitStruct(splitStructArray[i]);
+        printf("\n");
+    }
+
+    // execute splits
+    executeSplits(&dcel, splitStructArray);
+
+    // freeing split struct array
+    freeSplitStructArray(&splitStructArray);
+
+    // freeing watchtower struct array
     freeWatchtowerStructArray(&watchtowerStructArray);
 
     printf("\nprogram finished\n\n");

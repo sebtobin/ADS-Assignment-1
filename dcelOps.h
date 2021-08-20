@@ -42,14 +42,23 @@ typedef struct {
     size_t maxFaces;
 } dcel_t;
 
+typedef struct {
+    int startEdgeIndex;
+    int endEdgeIndex;
+} split_t;
+
 dcel_t *buildInitPolygon(char **initPolygonStringArray, dcel_t *dcel);
-dcel_t* edgeSplit(dcel_t *dcel, int edgeIndex1, int edgeIndex2);
+dcel_t* executeSplits(dcel_t *dcel, split_t **splitStructArray);
+dcel_t* edgeSplit(dcel_t *dcel, split_t *split);
 halfEdge_t* getHalfEdge(int startVertIndex, int endVertIndex, int edgeIndex);
 vertex_t getEdgeMidPoint(dcel_t *dcel, int edgeIndex);
+split_t** storeSplitStructs(char** splitStringArray, split_t **splitStructArray);
 void initialiseDcel(dcel_t *dcel, int initArraySize);
 void printDcel(dcel_t *dcel);
 void printFace(dcel_t* dcel, int faceIndex);
 void printEdge(dcel_t *dcel, int edgeIndex);
 void printHalfEdge(dcel_t *dcel, halfEdge_t *halfEdge);
 void printVertex(dcel_t *dcel, int vertexIndex);
+void printSplitStruct(split_t *split);
+void freeSplitStructArray(split_t ***splitStructArray);
 

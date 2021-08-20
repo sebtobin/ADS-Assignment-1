@@ -15,13 +15,13 @@
  * and store each string in a watchtowerData_t struct
  */
 watchtowerData_t**
-readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData_t **watchtowerStructArray) {
+storeWatchtowerStructs(char **watchtowerStringArray, watchtowerData_t **watchtowerStructArray) {
 
     int i;
     char *cellBuffer;
     size_t arraySize = INIT_ARRAY_SIZE;
 
-    // allocate memory for array of pointers to csv records as structs
+    // allocate memory for array of pointers to csv records was structs
     watchtowerStructArray = (watchtowerData_t**)malloc(sizeof(watchtowerData_t*) * arraySize);
     assert(watchtowerStructArray);
 
@@ -38,6 +38,7 @@ readWatchtowerStringArray(char **watchtowerStringArray, watchtowerData_t **watch
         if (i == arraySize) {
             arraySize *= 2;
             watchtowerStructArray = (watchtowerData_t**)realloc(watchtowerStructArray, sizeof(watchtowerData_t*) * arraySize);
+            assert(watchtowerStructArray);
         }
 
         // allocate memory to current watchtower struct pointer
@@ -96,10 +97,8 @@ printWatchtowerStruct(watchtowerData_t *watchtowerStruct) {
 void
 freeWatchtowerStructArray(watchtowerData_t ***watchtowerStructArray) {
 
-    int i;
-
     // free each struct pointer and strings within
-    for (i=0; (*watchtowerStructArray)[i] != NULL; i++) {
+    for (int i=0; (*watchtowerStructArray)[i] != NULL; i++) {
         free((*watchtowerStructArray)[i]->watchtowerID);
         free((*watchtowerStructArray)[i]->postcode);
         free((*watchtowerStructArray)[i]->watchtowerName);

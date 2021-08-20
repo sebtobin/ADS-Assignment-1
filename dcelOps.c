@@ -10,6 +10,7 @@
 
 #define INIT_ARRAY_SIZE 16
 #define COORD_DELIM " "
+#define SPLIT_DELIM " "
 
 void
 initialiseDcel(dcel_t *dcel, int initArraySize) {
@@ -88,10 +89,10 @@ printDcel(dcel_t *dcel) {
 
     int i;
 
-    printf("\nDCEL Data:\n\n");
-    printf("# of Faces: %d\n", dcel->numFaces);
-    printf("# of Edges: %d\n", dcel->numEdges);
-    printf("# of Vertices: %d\n", dcel->numVertices);
+    printf("\ndcel data:\n\n");
+    printf("# of faces: %d\n", dcel->numFaces);
+    printf("# of edges: %d\n", dcel->numEdges);
+    printf("# of vertices: %d\n", dcel->numVertices);
 
     for (i=0; i<dcel->numFaces; i++) {
         printFace(dcel, i);
@@ -106,11 +107,12 @@ printDcel(dcel_t *dcel) {
     }
 }
 
-void printFace(dcel_t* dcel, int faceIndex) {
+void
+printFace(dcel_t* dcel, int faceIndex) {
 
     halfEdge_t *curr = dcel->facesArray[faceIndex].halfEdge;
     int startVertIndex = curr->startVertIndex;
-    printf("\nFace index: %d\n\n", faceIndex);
+    printf("\nface index: %d\n\n", faceIndex);
 
     do {
         printHalfEdge(dcel, curr);
@@ -119,26 +121,73 @@ void printFace(dcel_t* dcel, int faceIndex) {
     } while (curr->startVertIndex != startVertIndex);
 }
 
-void printHalfEdge(dcel_t *dcel, halfEdge_t *halfEdge) {
-    printf("Face index %d\n", halfEdge->faceIndex);
-    printf("Edge index: %d\n", halfEdge->edgeIndex);
-    printf("Starting "); printVertex(dcel, halfEdge->startVertIndex);
-    printf("Ending "); printVertex(dcel, halfEdge->endVertIndex);
+void
+printHalfEdge(dcel_t *dcel, halfEdge_t *halfEdge) {
+    printf("face index %d\n", halfEdge->faceIndex);
+    printf("edge index: %d\n", halfEdge->edgeIndex);
+    printf("starting "); printVertex(dcel, halfEdge->startVertIndex);
+    printf("ending "); printVertex(dcel, halfEdge->endVertIndex);
 }
 
-void printEdge(dcel_t *dcel, int edgeIndex) {
-    printf("Edge at index %d has half edges:\n\n", edgeIndex);
+void
+printEdge(dcel_t *dcel, int edgeIndex) {
+    printf("edge at index %d has half edges:\n\n", edgeIndex);
     printHalfEdge(dcel, dcel->edgesArray[edgeIndex].halfEdge); printf("\n");
     if (dcel->edgesArray[edgeIndex].halfEdge->oppositeHalfEdge != NULL) {
         printHalfEdge(dcel, dcel->edgesArray[edgeIndex].halfEdge->oppositeHalfEdge);
     }
 }
 
-void printVertex(dcel_t* dcel, int vertexIndex) {
+void
+printVertex(dcel_t* dcel, int vertexIndex) {
     printf("vertex x,y = %lf,%lf at index: %d\n",
            dcel->verticesArray[vertexIndex].xCoord,
            dcel->verticesArray[vertexIndex].yCoord,
            vertexIndex);
+}
+
+split_t**
+storeSplitStructs(char** splitStringArray, split_t **splitStructArray) {
+
+    int i;
+    size_t arraySize = INIT_ARRAY_SIZE;
+
+    splitStructArray = (split_t**)malloc(sizeof(split_t*) * arraySize);
+    assert(splitStructArray);
+
+    for (i=0; splitStringArray[i] != NULL; i++) {
+
+        if (arraySize == i - 1) {
+            arraySize *= 2;
+            splitStructArray = (split_t**)realloc(splitStructArray, sizeof(split_t*) * arraySize);
+            assert(splitStructArray);
+        }
+        splitStructArray[i] = (split_t*)malloc(sizeof(split_t));
+        assert(splitStructArray[i]);
+
+        splitStructArray[i]->startEdgeIndex = atoi(strtok(splitStringArray[i], SPLIT_DELIM));
+        splitStructArray[i]->endEdgeIndex = atoi(strtok(NULL, SPLIT_DELIM));
+    }
+    splitStructArray[i] = NULL;
+
+    return splitStructArray;
+}
+
+void
+printSplitStruct(split_t *split) {
+    printf("starting edge index: %d\n", split->startEdgeIndex);
+    printf("ending edge index: %d\n", split->endEdgeIndex);
+}
+
+
+void
+freeSplitStructArray(split_t ***splitStructArray) {
+
+    for (int i=0; (*splitStructArray)[i] != NULL; i++) {
+        free((*splitStructArray)[i]);
+    }
+    free(*splitStructArray);
+    *splitStructArray = NULL;
 }
 
 vertex_t
@@ -155,19 +204,18 @@ getEdgeMidPoint(dcel_t *dcel, int edgeIndex) {
     return midPoint;
 }
 
-
 dcel_t*
-edgeSplit(dcel_t *dcel, int edgeIndex1, int edgeIndex2) {
+edgeSplit(dcel_t *dcel, split_t *split) {
 
     if (dcel->maxVertices - dcel->numVertices < 2) {
         dcel->maxVertices *= 2;
         dcel->verticesArray = (vertex_t*)realloc(dcel->verticesArray, sizeof(vertex_t) * dcel->maxVertices);
         assert(dcel->verticesArray);
     }
-    dcel->verticesArray[dcel->numVertices++] = getEdgeMidPoint(dcel, edgeIndex1);
-    dcel->verticesArray[dcel->numVertices++] = getEdgeMidPoint(dcel, edgeIndex2);
+    dcel->verticesArray[dcel->numVertices++] = getEdgeMidPoint(dcel, split->startEdgeIndex);
+    dcel->verticesArray[dcel->numVertices++] = getEdgeMidPoint(dcel, split->endEdgeIndex);
 
-    /* for adding whole edges after linkong all the half edges
+    /* for adding whole edges after linking all the half edges
     if (dcel->maxEdges == dcel->numEdges) {
         dcel->maxEdges *= 2;
         dcel->edgesArray = (edge_t*)realloc(dcel->edgesArray, sizeof(edge_t) * dcel->maxEdges);
@@ -187,5 +235,15 @@ getHalfEdge(int startVertIndex, int endVertIndex, int edgeIndex) {
     halfEdge->endVertIndex = endVertIndex;
     halfEdge->edgeIndex = edgeIndex;
     return halfEdge;
+}
+
+dcel_t*
+executeSplits(dcel_t *dcel, split_t **splitStructArray) {
+
+    for (int i=0; splitStructArray[i] != NULL; i++) {
+        edgeSplit(dcel, splitStructArray[i]);
+        printDcel(dcel);
+    }
+    return dcel;
 }
 

@@ -1,9 +1,0 @@
-/*
- *
- */
-
-#ifndef COMP20003_ASS1_VORONOI1_H
-#define COMP20003_ASS1_VORONOI1_H
-
-#endif //COMP20003_ASS1_VORONOI1_H
-
