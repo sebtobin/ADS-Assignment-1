@@ -44,7 +44,10 @@ buildInitPolygon(char **initPolygonStringArray, dcel_t *dcel) {
     int i;
     halfEdge_t **curr, *prev = NULL;
 
+    // read in each vertex for the initial polygon
     for (i=0; initPolygonStringArray[i]; i++) {
+
+        // allocate more memory if needed, as for the initial polygon num edges = num vertices
         if (i == dcel->maxVertices) {
             dcel->maxVertices *= 2;
             dcel->verticesArray = (vertex_t*)realloc(dcel->verticesArray, sizeof(vertex_t) * dcel->maxVertices);
@@ -54,35 +57,45 @@ buildInitPolygon(char **initPolygonStringArray, dcel_t *dcel) {
             assert(dcel->edgesArray);
         }
 
+        // set vertices
         dcel->verticesArray[dcel->numVertices].xCoord = strtod(strtok(initPolygonStringArray[i], COORD_DELIM), NULL);
         dcel->verticesArray[dcel->numVertices++].yCoord = strtod(strtok(NULL, COORD_DELIM), NULL);
     }
 
+    // start with the half edge pointer in the face struct
     curr = &(dcel->facesArray[dcel->numFaces].halfEdge);
 
+    // create new half edge each loop until all vertices linked
     for (i=0; i<dcel->numVertices; i++) {
 
         *curr = (halfEdge_t*)malloc(sizeof(halfEdge_t));
         assert(*curr);
 
+        // set indices and opposite half edge pointer
         (*curr)->startVertIndex = i;
         (*curr)->endVertIndex = (i + 1) % dcel->numVertices;
         (*curr)->faceIndex = 0;
         (*curr)->edgeIndex = i;
         (*curr)->oppositeHalfEdge = NULL;
 
+        // link between previous half edge
         if (prev != NULL) {
             (*curr)->prevHalfEdge = prev;
             (*curr)->prevHalfEdge->nextHalfEdge = *curr;
         }
 
-        prev = *curr;
+        // set the edge struct pointer
         dcel->edgesArray[dcel->numEdges++].halfEdge = *curr;
+
+        // set pointers for next loop
+        prev = *curr;
         curr = &((*curr)->nextHalfEdge);
     }
 
+    // link up first and last half edge
     *curr = dcel->facesArray[0].halfEdge;
     dcel->facesArray[dcel->numFaces++].halfEdge->prevHalfEdge = *curr;
+
     return dcel;
 }
 
@@ -93,10 +106,13 @@ printDcel(dcel_t *dcel) {
     int i;
 
     printf("\ndcel data:\n\n");
+
+    // print number of faces, edges and vertices in the DCEL
     printf("# of faces: %d\n", dcel->numFaces);
     printf("# of edges: %d\n", dcel->numEdges);
     printf("# of vertices: %d\n", dcel->numVertices);
 
+    // print info for every face, edge and vertex in the DCEL
     for (i=0; i<dcel->numFaces; i++) {
         printFace(dcel, i);
     }
@@ -118,6 +134,7 @@ printFace(dcel_t* dcel, int faceIndex) {
     int startVertIndex = curr->startVertIndex;
     printf("\nface index: %d\n\n", faceIndex);
 
+    // print every half edge in a face
     do {
         printHalfEdge(dcel, curr);
         curr = curr->nextHalfEdge;
@@ -128,6 +145,7 @@ printFace(dcel_t* dcel, int faceIndex) {
 /* print all the information in a half edge */
 void
 printHalfEdge(dcel_t *dcel, halfEdge_t *halfEdge) {
+
     printf("face index %d\n", halfEdge->faceIndex);
     printf("edge index: %d\n", halfEdge->edgeIndex);
     printf("starting "); printVertex(dcel, halfEdge->startVertIndex);
@@ -137,44 +155,57 @@ printHalfEdge(dcel_t *dcel, halfEdge_t *halfEdge) {
 /* print all half edges at a given edge index */
 void
 printEdge(dcel_t *dcel, int edgeIndex) {
+
     printf("edge at index %d has half edges:\n\n", edgeIndex);
     printHalfEdge(dcel, dcel->edgesArray[edgeIndex].halfEdge); printf("\n");
+
     if (dcel->edgesArray[edgeIndex].halfEdge->oppositeHalfEdge != NULL) {
+
         printHalfEdge(dcel, dcel->edgesArray[edgeIndex].halfEdge->oppositeHalfEdge);
     }
 }
-
 /* print coordinates of a vertex */
 void
 printVertex(dcel_t* dcel, int vertexIndex) {
+
     printf("vertex x,y = %lf,%lf at index: %d\n",
            dcel->verticesArray[vertexIndex].xCoord,
            dcel->verticesArray[vertexIndex].yCoord,
            vertexIndex);
 }
 
+/* calculate the midpoint of en edge and return a vertex at that location */
 vertex_t
 getEdgeMidPoint(dcel_t *dcel, int edgeIndex) {
 
     vertex_t midPoint;
     halfEdge_t *halfEdge = dcel->edgesArray[edgeIndex].halfEdge;
+
+    // get coords of vertices attached to edge
     double x1 = dcel->verticesArray[halfEdge->startVertIndex].xCoord;
     double y1 = dcel->verticesArray[halfEdge->startVertIndex].yCoord;
     double x2 = dcel->verticesArray[halfEdge->endVertIndex].xCoord;
     double y2 =  dcel->verticesArray[halfEdge->endVertIndex].yCoord;
+
+    // set return vertex coords as midpoint
     midPoint.xCoord = (x1 + x2) / 2;
     midPoint.yCoord = (y1 + y2) / 2;
+
     return midPoint;
 }
 
+/* execute a split from startEdgeIndex to endEdgeIndex on the DCEL */
 dcel_t*
 edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex) {
 
+    // allocate more space in DCEL arrays if required
     if (dcel->maxVertices - dcel->numVertices < 2) {
         dcel->maxVertices *= 2;
         dcel->verticesArray = (vertex_t*)realloc(dcel->verticesArray, sizeof(vertex_t) * dcel->maxVertices);
         assert(dcel->verticesArray);
     }
+
+    // set new vertices
     dcel->verticesArray[dcel->numVertices++] = getEdgeMidPoint(dcel, startEdgeIndex);
     dcel->verticesArray[dcel->numVertices++] = getEdgeMidPoint(dcel, endEdgeIndex);
 
@@ -190,23 +221,39 @@ edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex) {
     return dcel;
 }
 
+
 halfEdge_t*
 getHalfEdge(int startVertIndex, int endVertIndex, int edgeIndex) {
+
+    // allocate memory for new half edge
     halfEdge_t *halfEdge = (halfEdge_t*)malloc(sizeof(halfEdge_t));
     assert(halfEdge);
+
+    // set indices and pointers
     halfEdge->startVertIndex = startVertIndex;
     halfEdge->endVertIndex = endVertIndex;
     halfEdge->edgeIndex = edgeIndex;
+    halfEdge->nextHalfEdge = NULL;
+    halfEdge->prevHalfEdge = NULL;
+    halfEdge->oppositeHalfEdge = NULL;
+
     return halfEdge;
 }
 
+/* execute all the splits in splitsStringArray */
 dcel_t*
 executeSplits(dcel_t *dcel, char **splitStringArray) {
 
-    int startEdgeIndex, endEdgeIndex;
-    for (int i=0; splitStringArray[i] != NULL; i++) {
+    int i, startEdgeIndex, endEdgeIndex;
+
+    // execute splits in array order
+    for (i=0; splitStringArray[i] != NULL; i++) {
+
+        // get indices from string array
         startEdgeIndex = atoi(strtok(splitStringArray[i], SPLIT_DELIM));
         endEdgeIndex = atoi(strtok(NULL, SPLIT_DELIM));
+
+        // execute split about edges
         edgeSplit(dcel, startEdgeIndex, endEdgeIndex);
         printDcel(dcel);
     }

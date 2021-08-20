@@ -110,10 +110,15 @@ freeWatchtowerStructArray(watchtowerData_t ***watchtowerStructArray) {
     *watchtowerStructArray = NULL;
 }
 
+/* get the number of watchtowers in watchtower pointer array */
 int
 numWatchtowers(watchtowerData_t **watchtowersArray) {
 
     int i;
-    for (i=0; watchtowersArray[i] != NULL; i++) {}
+
+    // iterate through watchtower pointers until null pointers
+    for (i=0; watchtowersArray[i] != NULL; i++) {
+    }
+
     return i;
 }
