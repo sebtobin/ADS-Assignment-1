@@ -260,3 +260,59 @@ executeSplits(dcel_t *dcel, char **splitStringArray) {
     return dcel;
 }
 
+void printVisual(dcel_t *dcel) {
+
+    int i, initVertIndex;
+    halfEdge_t *curr;
+
+    for (i=0; i<dcel->numFaces; i++) {
+
+        curr = dcel->facesArray[i].halfEdge;
+        initVertIndex = curr->startVertIndex; printf("\n");
+        do {
+
+            printf("@E%d %d %lf %lf %lf %lf\n"
+                   , curr->edgeIndex
+                   , curr->faceIndex
+                   , dcel->verticesArray[curr->startVertIndex].xCoord
+                   , dcel->verticesArray[curr->startVertIndex].yCoord
+                   , dcel->verticesArray[curr->endVertIndex].xCoord
+                   , dcel->verticesArray[curr->endVertIndex].yCoord);
+            curr = curr->nextHalfEdge;
+
+        } while (curr->startVertIndex != initVertIndex);
+
+    }
+
+}
+
+void freeDcel(dcel_t *dcel) {
+
+    for (int i=0; i<dcel->numFaces; i++) {
+
+        freeFace(dcel->facesArray[i].halfEdge);
+    }
+
+    free(dcel->verticesArray);
+    free(dcel->edgesArray);
+    free(dcel->facesArray);
+
+}
+
+void freeFace(halfEdge_t *currHalfEdge) {
+
+    halfEdge_t *temp;
+    currHalfEdge->prevHalfEdge->nextHalfEdge = NULL;
+
+    while (currHalfEdge != NULL) {
+
+        /*printf("prev: %d curr: %d next: %d\n",
+               currHalfEdge->prevHalfEdge->edgeIndex,
+               currHalfEdge->edgeIndex,
+               currHalfEdge->nextHalfEdge->edgeIndex);*/
+        temp = currHalfEdge;
+        currHalfEdge = currHalfEdge->nextHalfEdge;
+        free(temp);
+    }
+
+}

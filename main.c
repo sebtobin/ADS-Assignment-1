@@ -80,8 +80,11 @@ main(int argc, char *argv[]) {
     executeSplits(&dcel, splitStringArray);
     freeStringArray(&splitStringArray);
 
-    // freeing watchtower struct array
+    printVisual(&dcel);
+
+    // freeing watchtower struct array and DCEL
     freeWatchtowerStructArray(&watchtowerStructArray);
+    freeDcel(&dcel);
 
     printf("\nprogram finished\n\n");
 
