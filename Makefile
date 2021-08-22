@@ -1,7 +1,7 @@
 # Makefile
 
 voronoi1: main.o readInputData.o dcelOps.o watchtowerOps.o
-	gcc -Wall -o main main.o readInputData.o dcelOps.o watchtowerOps.o
+	gcc -Wall -o voronoi1 main.o readInputData.o dcelOps.o watchtowerOps.o
 
 main.o: main.c readInputData.h dcelOps.h watchtowerOps.h
 	gcc -Wall -o main.o main.c -c

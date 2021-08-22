@@ -15,7 +15,7 @@ main(int argc, char *argv[]) {
 
     int i;
     char **watchtowerStringArray = NULL, **initPolygonStringArray = NULL, **splitStringArray = NULL;
-    FILE *CSVData, *initPolygonData;
+    FILE *CSVData, *initPolygonData, *splits;
     watchtowerData_t **watchtowerStructArray = NULL;
     dcel_t dcel;
 
@@ -67,7 +67,8 @@ main(int argc, char *argv[]) {
     //printDcel(&dcel);
 
     // read polygon splits into string array
-    splitStringArray = readTextData(stdin, splitStringArray);
+    splits = fopen("data/square_1split.txt", "r");
+    splitStringArray = readTextData(splits, splitStringArray);
 
     // print strings in splitStringArray
     printf("\n\nsplit strings:\n\n");
