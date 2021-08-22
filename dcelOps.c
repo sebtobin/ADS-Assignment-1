@@ -81,7 +81,7 @@ buildInitPolygon(char **initPolygonStringArray, dcel_t *dcel) {
         // link between previous half edge
         if (prev != NULL) {
             (*curr)->prevHalfEdge = prev;
-            (*curr)->prevHalfEdge->nextHalfEdge = *curr;
+            prev->nextHalfEdge = *curr;
         }
 
         // set the edge struct pointer
@@ -93,8 +93,8 @@ buildInitPolygon(char **initPolygonStringArray, dcel_t *dcel) {
     }
 
     // link up first and last half edge
-    *curr = dcel->facesArray[0].halfEdge;
-    dcel->facesArray[dcel->numFaces++].halfEdge->prevHalfEdge = *curr;
+    *curr = dcel->facesArray[dcel->numFaces].halfEdge;
+    dcel->facesArray[dcel->numFaces++].halfEdge->prevHalfEdge = prev;
 
     return dcel;
 }
@@ -306,10 +306,6 @@ void freeFace(halfEdge_t *currHalfEdge) {
 
     while (currHalfEdge != NULL) {
 
-        /*printf("prev: %d curr: %d next: %d\n",
-               currHalfEdge->prevHalfEdge->edgeIndex,
-               currHalfEdge->edgeIndex,
-               currHalfEdge->nextHalfEdge->edgeIndex);*/
         temp = currHalfEdge;
         currHalfEdge = currHalfEdge->nextHalfEdge;
         free(temp);
