@@ -69,6 +69,7 @@ main(int argc, char *argv[]) {
     // read polygon splits into string array
     splits = fopen("data/square_1split.txt", "r");
     splitStringArray = readTextData(splits, splitStringArray);
+    fclose(splits);
 
     // print strings in splitStringArray
     printf("\n\nsplit strings:\n\n");
