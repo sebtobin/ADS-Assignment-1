@@ -58,5 +58,6 @@ void printVertex(dcel_t *dcel, int vertexIndex);
 void printVisual(dcel_t *dcel);
 void freeFace(halfEdge_t *halfEdge);
 void freeDcel(dcel_t *dcel);
+void setFaceIndex(dcel_t *dcel, halfEdge_t *halfEdge, int faceIndex);
 
 
