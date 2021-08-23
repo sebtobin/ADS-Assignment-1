@@ -17,9 +17,9 @@ void
 initialiseDcel(dcel_t *dcel, int initArraySize) {
 
     // initialise initial array sizes
-    dcel->maxVertices = initArraySize;
-    dcel->maxEdges = initArraySize;
-    dcel->maxFaces = initArraySize;
+    dcel->verticesArraySize = initArraySize;
+    dcel->edgesArraySize = initArraySize;
+    dcel->facesArraySize = initArraySize;
 
     // initialise array n item buddy variables
     dcel->numVertices = 0;
@@ -27,13 +27,13 @@ initialiseDcel(dcel_t *dcel, int initArraySize) {
     dcel->numFaces = 0;
 
     // allocate memory for each array
-    dcel->verticesArray = (vertex_t*)malloc(sizeof(vertex_t) * dcel->maxVertices);
+    dcel->verticesArray = (vertex_t*)malloc(sizeof(vertex_t) * dcel->verticesArraySize);
     assert(dcel->verticesArray);
 
-    dcel->edgesArray = (edge_t*)malloc(sizeof(edge_t) * dcel->maxEdges);
+    dcel->edgesArray = (edge_t*)malloc(sizeof(edge_t) * dcel->edgesArraySize);
     assert(dcel->edgesArray);
 
-    dcel->facesArray = (face_t*)malloc(sizeof(face_t) * dcel->maxFaces);
+    dcel->facesArray = (face_t*)malloc(sizeof(face_t) * dcel->facesArraySize);
     assert(dcel->facesArray);
 }
 
@@ -48,12 +48,12 @@ buildInitPolygon(char **initPolygonStringArray, dcel_t *dcel) {
     for (i=0; initPolygonStringArray[i]; i++) {
 
         // allocate more memory if needed, as for the initial polygon num edges = num vertices
-        if (i == dcel->maxVertices) {
-            dcel->maxVertices *= 2;
-            dcel->verticesArray = (vertex_t*)realloc(dcel->verticesArray, sizeof(vertex_t) * dcel->maxVertices);
+        if (i == dcel->verticesArraySize) {
+            dcel->verticesArraySize *= 2;
+            dcel->verticesArray = (vertex_t*)realloc(dcel->verticesArray, sizeof(vertex_t) * dcel->verticesArraySize);
             assert(dcel->verticesArray);
-            dcel->maxEdges *= 2;
-            dcel->edgesArray = (edge_t*)realloc(dcel->edgesArray, sizeof(edge_t) * dcel->maxEdges);
+            dcel->edgesArraySize *= 2;
+            dcel->edgesArray = (edge_t*)realloc(dcel->edgesArray, sizeof(edge_t) * dcel->edgesArraySize);
             assert(dcel->edgesArray);
         }
 
@@ -199,9 +199,9 @@ dcel_t*
 edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex) {
 
     // allocate more space in DCEL arrays if required
-    if (dcel->maxVertices - dcel->numVertices < 2) {
-        dcel->maxVertices *= 2;
-        dcel->verticesArray = (vertex_t*)realloc(dcel->verticesArray, sizeof(vertex_t) * dcel->maxVertices);
+    if (dcel->verticesArraySize - dcel->numVertices < 2) {
+        dcel->verticesArraySize *= 2;
+        dcel->verticesArray = (vertex_t*)realloc(dcel->verticesArray, sizeof(vertex_t) * dcel->verticesArraySize);
         assert(dcel->verticesArray);
     }
 
@@ -210,9 +210,9 @@ edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex) {
     dcel->verticesArray[dcel->numVertices++] = getEdgeMidPoint(dcel, endEdgeIndex);
 
     /* for adding whole edges after linking all the half edges
-    if (dcel->maxEdges == dcel->numEdges) {
-        dcel->maxEdges *= 2;
-        dcel->edgesArray = (edge_t*)realloc(dcel->edgesArray, sizeof(edge_t) * dcel->maxEdges);
+    if (dcel->edgesArraySize == dcel->numEdges) {
+        dcel->edgesArraySize *= 2;
+        dcel->edgesArray = (edge_t*)realloc(dcel->edgesArray, sizeof(edge_t) * dcel->edgesArraySize);
         assert(dcel->edgesArray);
     }
     dcel->edgesArray[dcel->numEdges++].halfEdge

@@ -37,9 +37,9 @@ typedef struct {
     int numVertices;
     int numEdges;
     int numFaces;
-    size_t maxVertices;
-    size_t maxEdges;
-    size_t maxFaces;
+    size_t verticesArraySize;
+    size_t edgesArraySize;
+    size_t facesArraySize;
 } dcel_t;
 
 dcel_t *buildInitPolygon(char **initPolygonStringArray, dcel_t *dcel);
