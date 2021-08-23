@@ -99,6 +99,7 @@ buildInitPolygon(char **initPolygonStringArray, dcel_t *dcel) {
     return dcel;
 }
 
+
 /* print all information in a DCEL */
 void
 printDcel(dcel_t *dcel) {
@@ -185,7 +186,7 @@ getEdgeMidPoint(dcel_t *dcel, int edgeIndex) {
     double x1 = dcel->verticesArray[halfEdge->startVertIndex].xCoord;
     double y1 = dcel->verticesArray[halfEdge->startVertIndex].yCoord;
     double x2 = dcel->verticesArray[halfEdge->endVertIndex].xCoord;
-    double y2 =  dcel->verticesArray[halfEdge->endVertIndex].yCoord;
+    double y2 = dcel->verticesArray[halfEdge->endVertIndex].yCoord;
 
     // set return vertex coords as midpoint
     midPoint.xCoord = (x1 + x2) / 2;
@@ -194,9 +195,38 @@ getEdgeMidPoint(dcel_t *dcel, int edgeIndex) {
     return midPoint;
 }
 
+vertex_t
+getVerticesMidPoint(vertex_t vertex1, vertex_t vertex2) {
+
+    vertex_t midPoint;
+
+    // set return vertex coords as midpoint
+    midPoint.xCoord = (vertex1.xCoord + vertex2.xCoord) / 2;
+    midPoint.yCoord = (vertex1.yCoord + vertex2.yCoord) / 2;
+
+    return midPoint;
+}
+
 /* execute a split from startEdgeIndex to endEdgeIndex on the DCEL */
 dcel_t*
 edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex) {
+
+    halfEdge_t *temp;
+
+    // get new vertices and midpoint for bisecting edge
+    vertex_t startEdgeMidPoint = getEdgeMidPoint(dcel, startEdgeIndex);
+    vertex_t endEdgeMidPoint = getEdgeMidPoint(dcel, endEdgeIndex);
+    vertex_t verticesMidPoint = getVerticesMidPoint(startEdgeMidPoint, endEdgeMidPoint);
+
+    // set half edge pointer in edge structs so they belong to face being split, exit if inside edge is NULL
+    if (!halfEdgeCheck(dcel, dcel->edgesArray[startEdgeIndex].halfEdge, verticesMidPoint)) {
+        dcel->edgesArray[startEdgeIndex].halfEdge = dcel->edgesArray[startEdgeIndex].halfEdge->oppositeHalfEdge;
+        assert(dcel->edgesArray[startEdgeIndex].halfEdge);
+    }
+    if (!halfEdgeCheck(dcel, dcel->edgesArray[endEdgeIndex].halfEdge, verticesMidPoint)) {
+        dcel->edgesArray[endEdgeIndex].halfEdge = dcel->edgesArray[endEdgeIndex].halfEdge->oppositeHalfEdge;
+        assert(dcel->edgesArray[endEdgeIndex].halfEdge);
+    }
 
     // allocate more space in DCEL arrays if required
     if (dcel->verticesArraySize - dcel->numVertices < 2) {
@@ -206,24 +236,44 @@ edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex) {
     }
 
     // set new vertices
-    dcel->verticesArray[dcel->numVertices++] = getEdgeMidPoint(dcel, startEdgeIndex);
-    dcel->verticesArray[dcel->numVertices++] = getEdgeMidPoint(dcel, endEdgeIndex);
+    dcel->verticesArray[dcel->numVertices] = startEdgeMidPoint;
+    dcel->verticesArray[dcel->numVertices + 1] = endEdgeMidPoint;
+    dcel->edgesArray[startEdgeIndex].halfEdge->endVertIndex = dcel->numVertices;
+    if ((temp = dcel->edgesArray[startEdgeIndex].halfEdge->oppositeHalfEdge) != NULL) {
+        temp->endVertIndex = dcel->numVertices;
+    }
+    dcel->numVertices++;
+    dcel->edgesArray[endEdgeIndex].halfEdge->startVertIndex = dcel->numVertices;
+    if ((temp = dcel->edgesArray[endEdgeIndex].halfEdge->oppositeHalfEdge) != NULL) {
+        temp->startVertIndex = dcel->numVertices;
+    }
+    dcel->numVertices++;
 
-    /* for adding whole edges after linking all the half edges
-    if (dcel->edgesArraySize == dcel->numEdges) {
+    // create bisecting half edge for already existing face
+    temp = getHalfEdge(dcel->edgesArray[startEdgeIndex].halfEdge->endVertIndex,
+                dcel->edgesArray[endEdgeIndex].halfEdge->startVertIndex,
+                dcel->edgesArray[startEdgeIndex].halfEdge,
+                dcel->edgesArray[endEdgeIndex].halfEdge);
+
+    // link to starting and ending half edges in already existing face
+    dcel->edgesArray[startEdgeIndex].halfEdge->nextHalfEdge = temp;
+    dcel->edgesArray[endEdgeIndex].halfEdge->prevHalfEdge = temp;
+
+    // allocate space for more edges
+    if (dcel->edgesArraySize - dcel->numEdges < 3) {
         dcel->edgesArraySize *= 2;
         dcel->edgesArray = (edge_t*)realloc(dcel->edgesArray, sizeof(edge_t) * dcel->edgesArraySize);
         assert(dcel->edgesArray);
     }
-    dcel->edgesArray[dcel->numEdges++].halfEdge
-    */
+    dcel->edgesArray[dcel->numEdges].halfEdge = temp;
+    temp->edgeIndex = dcel->numEdges++;
+    temp->faceIndex = temp->prevHalfEdge->faceIndex;
 
     return dcel;
 }
 
-
 halfEdge_t*
-getHalfEdge(int startVertIndex, int endVertIndex, int edgeIndex) {
+getHalfEdge(int startVertIndex, int endVertIndex, halfEdge_t *prev, halfEdge_t *next) {
 
     // allocate memory for new half edge
     halfEdge_t *halfEdge = (halfEdge_t*)malloc(sizeof(halfEdge_t));
@@ -232,9 +282,8 @@ getHalfEdge(int startVertIndex, int endVertIndex, int edgeIndex) {
     // set indices and pointers
     halfEdge->startVertIndex = startVertIndex;
     halfEdge->endVertIndex = endVertIndex;
-    halfEdge->edgeIndex = edgeIndex;
-    halfEdge->nextHalfEdge = NULL;
-    halfEdge->prevHalfEdge = NULL;
+    halfEdge->nextHalfEdge = next;
+    halfEdge->prevHalfEdge = prev;
     halfEdge->oppositeHalfEdge = NULL;
 
     return halfEdge;
@@ -311,4 +360,61 @@ void freeFace(halfEdge_t *currHalfEdge) {
         free(temp);
     }
 
+}
+
+int
+halfEdgeCheck(dcel_t* dcel, halfEdge_t *halfEdge, vertex_t midPoint) {
+
+    double y2 = dcel->verticesArray[halfEdge->endVertIndex].yCoord;
+    double y1 = dcel->verticesArray[halfEdge->startVertIndex].yCoord;
+    double x2 = dcel->verticesArray[halfEdge->endVertIndex].xCoord;
+    double x1 = dcel->verticesArray[halfEdge->startVertIndex].xCoord;
+
+    // check the special case for x1 == x2
+    if (x1 == x2) {
+
+        if (y2 > y1 && midPoint.xCoord > x1) {
+            return 1;
+        }
+        else if (y1 > y2 && midPoint.xCoord < x1) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
+
+    }
+
+    // check the special case for y1 == y2
+    if (y1 == y2) {
+
+        if (x2 > x1 && midPoint.yCoord < y1) {
+            return 1;
+        }
+        else if (x1 > x2 && midPoint.yCoord > y1) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
+
+    }
+
+    // if x1 != x2 and y1 != y2 use the gradient to check if midpoint is in the face
+    double m = (y2 - y1) / (x2 - x1);
+    double c = y2 - m * x2;
+    double yPredicted = m * midPoint.xCoord + c;
+
+    printf("%lf\n", y2);
+    printf("%lf\n", y1);
+    printf("%lf\n", x2);
+    printf("%lf\n", x1);
+    printf("%lf\n", m);
+    printf("%lf\n", c);
+    printf("%lf\n",yPredicted);
+
+    if ((y2 > y1 && midPoint.yCoord > yPredicted) || (y1 > y2 && yPredicted > midPoint.yCoord)) {
+        return 1;
+    }
+    return 0;
 }

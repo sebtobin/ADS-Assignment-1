@@ -45,8 +45,10 @@ typedef struct {
 dcel_t *buildInitPolygon(char **initPolygonStringArray, dcel_t *dcel);
 dcel_t* executeSplits(dcel_t *dcel, char **splitStringArray);
 dcel_t* edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex);
-halfEdge_t* getHalfEdge(int startVertIndex, int endVertIndex, int edgeIndex);
+halfEdge_t* getHalfEdge(int startVertIndex, int endVertIndex, halfEdge_t *prev, halfEdge_t *next);
 vertex_t getEdgeMidPoint(dcel_t *dcel, int edgeIndex);
+vertex_t getVerticesMidPoint(vertex_t vertex1, vertex_t vertex2);
+int halfEdgeCheck(dcel_t* dcel, halfEdge_t *halfEdge, vertex_t midPoint);
 void initialiseDcel(dcel_t *dcel, int initArraySize);
 void printDcel(dcel_t *dcel);
 void printFace(dcel_t* dcel, int faceIndex);
