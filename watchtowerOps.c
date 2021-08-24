@@ -74,6 +74,8 @@ storeWatchtowerStructs(char **watchtowerStringArray, watchtowerData_t **watchtow
 
         cellBuffer = strtok(NULL, CELL_DELIM);
         watchtowerStructArray[i]->latitude = strtod(cellBuffer, NULL);
+
+        watchtowerStructArray[i]->isCategorised = 0;
     }
 
     // add null pointer to signify end of array
@@ -84,11 +86,13 @@ storeWatchtowerStructs(char **watchtowerStringArray, watchtowerData_t **watchtow
 
 /* print out the contents of the watchtowerData_t struct */
 void
-printWatchtowerStruct(watchtowerData_t *watchtowerStruct) {
-    printf("%s\n%s\n%d\n%s\n%lf\n%lf\n\n", watchtowerStruct->watchtowerID
-           , watchtowerStruct->postcode, watchtowerStruct->populationServed
-           , watchtowerStruct->watchtowerName, watchtowerStruct->longitude
-           , watchtowerStruct->latitude);
+printWatchtowerStruct(watchtowerData_t *watchtowerStruct, FILE *file) {
+    fprintf(file, "Watchtower ID: %s, ", watchtowerStruct->watchtowerID);
+    fprintf(file, "Postcode: %s, ", watchtowerStruct->postcode);
+    fprintf(file, "Population Served: %d, ", watchtowerStruct->populationServed);
+    fprintf(file, "Watchtower Point of Contact Name: %s, ", watchtowerStruct->watchtowerName);
+    fprintf(file, "x: %lf, ", watchtowerStruct->longitude);
+    fprintf(file, "y: %lf\n", watchtowerStruct->latitude);
 }
 
 /* free all the strings in the watchtowerData_t structs in an array,

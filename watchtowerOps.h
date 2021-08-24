@@ -14,9 +14,10 @@ typedef struct {
     char *watchtowerName;
     double longitude;
     double latitude;
+    int isCategorised;
 } watchtowerData_t;
 
 watchtowerData_t **storeWatchtowerStructs(char **watchtowerStringArray, watchtowerData_t **watchtowerStructArray);
-void printWatchtowerStruct(watchtowerData_t *watchtowerStruct);
+void printWatchtowerStruct(watchtowerData_t *watchtowerStruct, FILE *file);
 void freeWatchtowerStructArray(watchtowerData_t ***watchtowerStructArray);
 int numWatchtowers(watchtowerData_t **watchtowersArray);
