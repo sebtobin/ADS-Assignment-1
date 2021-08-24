@@ -313,7 +313,7 @@ edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex) {
     // if starting edge has twin edge, create and link up new half edge
     if ((twin = dcel->edgesArray[startEdgeIndex].halfEdge->oppositeHalfEdge) != NULL) {
 
-        // store previous next half edge pointer and end vertex index
+        // store previous prev half edge pointer and start vertex index
         halfEdge_t *startEdgePrev = twin->prevHalfEdge;
         int startEdgeStartVertIndex = twin->startVertIndex;
 
@@ -326,7 +326,7 @@ edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex) {
         twin->prevHalfEdge->edgeIndex = dcel->numEdges;
         twin->prevHalfEdge->faceIndex = twin->faceIndex;
         twin->prevHalfEdge->oppositeHalfEdge = dcel->edgesArray[dcel->numEdges].halfEdge;
-
+        twin->prevHalfEdge->oppositeHalfEdge->oppositeHalfEdge = twin->prevHalfEdge;
     }
     dcel->numEdges++;
 
@@ -350,6 +350,7 @@ edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex) {
         twin->nextHalfEdge->edgeIndex = dcel->numEdges;
         twin->nextHalfEdge->faceIndex = twin->faceIndex;
         twin->nextHalfEdge->oppositeHalfEdge = dcel->edgesArray[dcel->numEdges].halfEdge;
+        twin->nextHalfEdge->oppositeHalfEdge->oppositeHalfEdge = twin->nextHalfEdge;
 
     }
     dcel->numEdges++;
