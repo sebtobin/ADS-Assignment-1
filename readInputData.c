@@ -26,6 +26,10 @@ readTextData(FILE *text, char **stringArray) {
     // storing each line in the text as a string
     for (i=0; fgets(lineBuffer, LINE_BUFFER_SIZE + 1, text) != NULL; i++) {
 
+        // for edge case where an empty string is passed for no splits
+        // but it actually has a newline character for some reason
+        if (strlen(lineBuffer) < 3) break;
+
         // allocate more memory if needed
         if (i == arraySize - 1) {
             arraySize *= 2;
