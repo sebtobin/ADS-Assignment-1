@@ -161,11 +161,14 @@ void
 printEdge(dcel_t *dcel, int edgeIndex) {
 
     printf("edge at index %d has half edges:\n\n", edgeIndex);
-    printHalfEdge(dcel, dcel->edgesArray[edgeIndex].halfEdge); printf("\n");
+    printHalfEdge(dcel, dcel->edgesArray[edgeIndex].halfEdge);
+    printf("\n");
 
     if (dcel->edgesArray[edgeIndex].halfEdge->oppositeHalfEdge != NULL) {
 
         printHalfEdge(dcel, dcel->edgesArray[edgeIndex].halfEdge->oppositeHalfEdge);
+        printf("\n");
+
     }
 }
 /* print coordinates of a vertex */
@@ -214,8 +217,8 @@ getVerticesMidPoint(vertex_t vertex1, vertex_t vertex2) {
 dcel_t*
 edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex) {
 
-    int startEdgeEndVertexIndex, endEdgeStartVertexIndex, areAdjacentEdges = 0;
-    halfEdge_t *temp, *startEdgeNext = NULL, *endEdgePrev = NULL;
+    int startEdgeEndVertIndex, endEdgeStartVertexIndex, areAdjacentEdges = 0;
+    halfEdge_t *temp = NULL, *twin = NULL, *startEdgeNext = NULL, *endEdgePrev = NULL;
 
     // get new vertices and midpoint for bisecting edge
     vertex_t startEdgeMidPoint = getEdgeMidPoint(dcel, startEdgeIndex);
@@ -232,23 +235,21 @@ edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex) {
         assert(dcel->edgesArray[endEdgeIndex].halfEdge);
     }
 
-    // allocate more space in DCEL arrays if required
-
-    // allocate space for more vertices
+    // allocate space for more vertices if required
     if (dcel->verticesArraySize - dcel->numVertices < NUM_NEW_VERTICES) {
         dcel->verticesArraySize *= 2;
         dcel->verticesArray = (vertex_t*)realloc(dcel->verticesArray, sizeof(vertex_t) * dcel->verticesArraySize);
         assert(dcel->verticesArray);
     }
 
-    // allocate space for more edges
+    // allocate space for more edges if required
     if (dcel->edgesArraySize - dcel->numEdges < NUM_NEW_EDGES) {
         dcel->edgesArraySize *= 2;
         dcel->edgesArray = (edge_t*)realloc(dcel->edgesArray, sizeof(edge_t) * dcel->edgesArraySize);
         assert(dcel->edgesArray);
     }
 
-    // allocate space for more faces
+    // allocate space for more faces if required
     if (dcel->facesArraySize - dcel->numFaces < NUM_NEW_FACES) {
         dcel->facesArraySize *= 2;
         dcel->facesArray = (face_t*)realloc(dcel->facesArray, sizeof(face_t) * dcel->facesArraySize);
@@ -256,7 +257,7 @@ edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex) {
     }
 
     // store vertex indices of old edges
-    startEdgeEndVertexIndex = dcel->edgesArray[startEdgeIndex].halfEdge->endVertIndex;
+    startEdgeEndVertIndex = dcel->edgesArray[startEdgeIndex].halfEdge->endVertIndex;
     endEdgeStartVertexIndex = dcel->edgesArray[endEdgeIndex].halfEdge->startVertIndex;
 
     if (dcel->edgesArray[startEdgeIndex].halfEdge->nextHalfEdge == dcel->edgesArray[endEdgeIndex].halfEdge) {
@@ -272,16 +273,8 @@ edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex) {
     dcel->verticesArray[dcel->numVertices + 1] = endEdgeMidPoint;
 
     // set new start/ending vertices for split edges
-    dcel->edgesArray[startEdgeIndex].halfEdge->endVertIndex = dcel->numVertices;
-    if ((temp = dcel->edgesArray[startEdgeIndex].halfEdge->oppositeHalfEdge) != NULL) {
-        temp->endVertIndex = dcel->numVertices;
-    }
-    dcel->numVertices++;
-    dcel->edgesArray[endEdgeIndex].halfEdge->startVertIndex = dcel->numVertices;
-    if ((temp = dcel->edgesArray[endEdgeIndex].halfEdge->oppositeHalfEdge) != NULL) {
-        temp->startVertIndex = dcel->numVertices;
-    }
-    dcel->numVertices++;
+    dcel->edgesArray[startEdgeIndex].halfEdge->endVertIndex = dcel->numVertices++;
+    dcel->edgesArray[endEdgeIndex].halfEdge->startVertIndex = dcel->numVertices++;
 
     // create bisecting half edge for already existing face, linked to split edges
     temp = getHalfEdge(dcel->edgesArray[startEdgeIndex].halfEdge->endVertIndex,
@@ -294,29 +287,72 @@ edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex) {
     dcel->edgesArray[endEdgeIndex].halfEdge->prevHalfEdge = temp;
 
     // store new edge in edge array, set new half edge's edge and face indices
-    dcel->edgesArray[dcel->numEdges].halfEdge = temp;
-    dcel->facesArray[dcel->numFaces - 1].halfEdge = temp;
     temp->edgeIndex = dcel->numEdges;
     temp->faceIndex = temp->prevHalfEdge->faceIndex;
+    dcel->edgesArray[dcel->numEdges].halfEdge = temp;
+    dcel->facesArray[temp->faceIndex].halfEdge = temp;
 
     /* get twin of bisecting half edge, set new face half edge pointer
      * to this half edge, set edge index to the same index as twin
      */
-    temp = getHalfEdge(temp->endVertIndex, temp->startVertIndex, NULL, NULL);
+    temp->oppositeHalfEdge = getHalfEdge(temp->endVertIndex, temp->startVertIndex, NULL, NULL);
+    temp->oppositeHalfEdge->oppositeHalfEdge = temp;
+    temp = temp->oppositeHalfEdge;
     dcel->facesArray[dcel->numFaces].halfEdge = temp;
     temp->edgeIndex = dcel->numEdges++;
 
     /* setup new half edges on either side of twin bisecting half edge,
      * these and linked half edges make up the new face, for each set edge index
-     * and edge struct's half edge pointer
+     * and set new edge's half edge pointer, needed for twin half edge's opposite
+     * half edge pointer, if a twin half edge exists
      */
-    temp->nextHalfEdge = getHalfEdge(temp->endVertIndex, startEdgeEndVertexIndex, temp, startEdgeNext);
+    temp->nextHalfEdge = getHalfEdge(temp->endVertIndex, startEdgeEndVertIndex, temp, startEdgeNext);
     temp->nextHalfEdge->edgeIndex = dcel->numEdges;
-    dcel->edgesArray[dcel->numEdges++].halfEdge = temp->nextHalfEdge;
+    dcel->edgesArray[dcel->numEdges].halfEdge = temp->nextHalfEdge;
+
+    // if starting edge has twin edge, create and link up new half edge
+    if ((twin = dcel->edgesArray[startEdgeIndex].halfEdge->oppositeHalfEdge) != NULL) {
+
+        // store previous next half edge pointer and end vertex index
+        halfEdge_t *startEdgePrev = twin->prevHalfEdge;
+        int startEdgeStartVertIndex = twin->startVertIndex;
+
+        // create new half edge and link to twin split edge
+        twin->startVertIndex = twin->oppositeHalfEdge->endVertIndex;
+        twin->prevHalfEdge = getHalfEdge(startEdgeStartVertIndex, twin->startVertIndex, startEdgePrev, twin);
+        startEdgePrev->nextHalfEdge = twin->prevHalfEdge;
+
+        // assign new half edge's indices and set opposite half edge pointer
+        twin->prevHalfEdge->edgeIndex = dcel->numEdges;
+        twin->prevHalfEdge->faceIndex = twin->faceIndex;
+        twin->prevHalfEdge->oppositeHalfEdge = dcel->edgesArray[dcel->numEdges].halfEdge;
+
+    }
+    dcel->numEdges++;
 
     temp->prevHalfEdge = getHalfEdge(endEdgeStartVertexIndex, temp->startVertIndex, endEdgePrev, temp);
     temp->prevHalfEdge->edgeIndex = dcel->numEdges;
-    dcel->edgesArray[dcel->numEdges++].halfEdge = temp->prevHalfEdge;
+    dcel->edgesArray[dcel->numEdges].halfEdge = temp->prevHalfEdge;
+
+    // if ending edge has twin edge, create and link up new half edge
+    if ((twin = dcel->edgesArray[endEdgeIndex].halfEdge->oppositeHalfEdge) != NULL) {
+
+        // store previous next half edge pointer and end vertex index
+        halfEdge_t *endEdgeNext = twin->nextHalfEdge;
+        int endEdgeEndVertIndex = twin->endVertIndex;
+
+        // create new half edge and link to twin split edge
+        twin->endVertIndex = twin->oppositeHalfEdge->startVertIndex;
+        twin->nextHalfEdge = getHalfEdge(twin->endVertIndex, endEdgeEndVertIndex, twin, endEdgeNext);
+        endEdgeNext->prevHalfEdge = twin->nextHalfEdge;
+
+        // assign new half edge's indices and set opposite half edge pointer
+        twin->nextHalfEdge->edgeIndex = dcel->numEdges;
+        twin->nextHalfEdge->faceIndex = twin->faceIndex;
+        twin->nextHalfEdge->oppositeHalfEdge = dcel->edgesArray[dcel->numEdges].halfEdge;
+
+    }
+    dcel->numEdges++;
 
     /* if the starting edge's next half edge is the ending edge, new half edges
      * won't have a preexisting half edge to link to, so they must link to each other
@@ -341,7 +377,6 @@ void
 setFaceIndex(dcel_t *dcel, halfEdge_t *halfEdge, int faceIndex) {
 
     int initVertIndex = halfEdge->startVertIndex;
-    printf("\n\ninit vert index: %d\n", initVertIndex);
 
     do {
         halfEdge->faceIndex = faceIndex;
@@ -383,6 +418,7 @@ executeSplits(dcel_t *dcel, char **splitStringArray) {
         // execute split about edges
         edgeSplit(dcel, startEdgeIndex, endEdgeIndex);
         printDcel(dcel);
+
     }
     return dcel;
 }
@@ -483,15 +519,7 @@ halfEdgeCheck(dcel_t* dcel, halfEdge_t *halfEdge, vertex_t midPoint) {
     double c = y2 - m * x2;
     double yPredicted = m * midPoint.xCoord + c;
 
-    printf("%lf\n", y2);
-    printf("%lf\n", y1);
-    printf("%lf\n", x2);
-    printf("%lf\n", x1);
-    printf("%lf\n", m);
-    printf("%lf\n", c);
-    printf("%lf\n",yPredicted);
-
-    if ((y2 > y1 && midPoint.yCoord > yPredicted) || (y1 > y2 && yPredicted > midPoint.yCoord)) {
+    if ((x1 > x2 && midPoint.yCoord > yPredicted) || (x2 > x1 && yPredicted > midPoint.yCoord)) {
         return 1;
     }
     return 0;
