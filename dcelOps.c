@@ -110,122 +110,6 @@ buildInitPolygon(char **initPolygonStringArray, dcel_t *dcel) {
     return dcel;
 }
 
-
-// print all information in a DCEL
-void
-printDcel(dcel_t *dcel) {
-
-    int i;
-
-    printf("\ndcel data:\n\n");
-
-    // print array size for array of vertices, edges and faces
-    printf("array size of veritces array: %d\n", (int)dcel->verticesArraySize);
-    printf("array size of edges array: %d\n", (int)dcel->edgesArraySize);
-    printf("array size of faces array: %d\n", (int)dcel->facesArraySize);
-
-    // print number of faces, edges and vertices in the DCEL
-    printf("\n# of faces: %d\n", dcel->numFaces);
-    printf("# of edges: %d\n", dcel->numEdges);
-    printf("# of vertices: %d\n", dcel->numVertices);
-
-    // print info for every face, edge and vertex in the DCEL
-    for (i=0; i<dcel->numFaces; i++) {
-        printFace(dcel, i);
-    }
-
-    for (i=0; i<dcel->numEdges; i++) {
-        printEdge(dcel, i);
-    }
-
-    for (i=0; i<dcel->numVertices; i++) {
-        printVertex(dcel, i);
-    }
-}
-
-// print the indices of every half edge in a face
-void
-printFace(dcel_t* dcel, int faceIndex) {
-
-    halfEdge_t *currHalfEdge = dcel->facesArray[faceIndex].halfEdge;
-    int initVertIndex = currHalfEdge->startVertIndex;
-    printf("\nface index: %d\n\n", faceIndex);
-
-    // print every half edge in a face
-    do {
-        printHalfEdge(dcel, currHalfEdge);
-        currHalfEdge = currHalfEdge->nextHalfEdge;
-        printf("\n");
-    } while (currHalfEdge->startVertIndex != initVertIndex);
-}
-
-// print the indices in a half edge
-void
-printHalfEdge(dcel_t *dcel, halfEdge_t *halfEdge) {
-
-    printf("face index %d\n", halfEdge->faceIndex);
-    printf("edge index: %d\n", halfEdge->edgeIndex);
-    printf("starting "); printVertex(dcel, halfEdge->startVertIndex);
-    printf("ending "); printVertex(dcel, halfEdge->endVertIndex);
-}
-
-// print all half edges at a given edge index
-void
-printEdge(dcel_t *dcel, int edgeIndex) {
-
-    printf("edge at index %d has half edges:\n\n", edgeIndex);
-    printHalfEdge(dcel, dcel->edgesArray[edgeIndex].halfEdge);
-    printf("\n");
-
-    // print twin half edge if it exists
-    if (dcel->edgesArray[edgeIndex].halfEdge->oppositeHalfEdge != NULL) {
-        printHalfEdge(dcel, dcel->edgesArray[edgeIndex].halfEdge->oppositeHalfEdge);
-        printf("\n");
-    }
-}
-// print coordinates of a vertex
-void
-printVertex(dcel_t* dcel, int vertexIndex) {
-
-    printf("vertex x,y = %lf,%lf at index: %d\n",
-           dcel->verticesArray[vertexIndex].xCoord,
-           dcel->verticesArray[vertexIndex].yCoord,
-           vertexIndex);
-}
-
-// calculate the midpoint of en edge in the DCEL and return a vertex at that location
-vertex_t
-getEdgeMidPoint(dcel_t *dcel, int edgeIndex) {
-
-    vertex_t midPoint;
-    halfEdge_t *halfEdge = dcel->edgesArray[edgeIndex].halfEdge;
-
-    // get coords of vertices attached to edge
-    double x1 = dcel->verticesArray[halfEdge->startVertIndex].xCoord;
-    double y1 = dcel->verticesArray[halfEdge->startVertIndex].yCoord;
-    double x2 = dcel->verticesArray[halfEdge->endVertIndex].xCoord;
-    double y2 = dcel->verticesArray[halfEdge->endVertIndex].yCoord;
-
-    // set return vertex coords as midpoint
-    midPoint.xCoord = (x1 + x2) / 2;
-    midPoint.yCoord = (y1 + y2) / 2;
-
-    return midPoint;
-}
-
-// return a new vertex at the midpoint between vertex1 and vertex2
-vertex_t
-getVerticesMidPoint(vertex_t vertex1, vertex_t vertex2) {
-
-    vertex_t midPoint;
-
-    // set return vertex coords as midpoint
-    midPoint.xCoord = (vertex1.xCoord + vertex2.xCoord) / 2;
-    midPoint.yCoord = (vertex1.yCoord + vertex2.yCoord) / 2;
-
-    return midPoint;
-}
-
 // execute a split from startEdgeIndex to endEdgeIndex on the DCEL
 dcel_t*
 edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex) {
@@ -390,41 +274,6 @@ edgeSplit(dcel_t *dcel, int startEdgeIndex, int endEdgeIndex) {
     return dcel;
 }
 
-// set the face index of all half edges in a face
-void
-setFaceIndex(dcel_t *dcel, halfEdge_t *currHalfEdge, int faceIndex) {
-
-    int initVertIndex = currHalfEdge->startVertIndex;
-
-    // traverse circular linked list, set each face index, until returning to the first halfEdge
-    do {
-        currHalfEdge->faceIndex = faceIndex;
-        currHalfEdge = currHalfEdge->nextHalfEdge;
-    } while (currHalfEdge->startVertIndex != initVertIndex);
-}
-
-// malloc a new half edge with next, prev pointers and start, end vertex indices from parameters
-halfEdge_t*
-getHalfEdge(int startVertIndex, int endVertIndex, halfEdge_t *prev, halfEdge_t *next) {
-
-    // allocate memory for new half edge
-    halfEdge_t *halfEdge = (halfEdge_t*)malloc(sizeof(halfEdge_t));
-    assert(halfEdge);
-
-    // set indices and pointers
-    halfEdge->startVertIndex = startVertIndex;
-    halfEdge->endVertIndex = endVertIndex;
-    halfEdge->nextHalfEdge = next;
-    halfEdge->prevHalfEdge = prev;
-    halfEdge->oppositeHalfEdge = NULL;
-
-    // designated garbage value for these indices
-    halfEdge->edgeIndex = -1;
-    halfEdge->faceIndex = -1;
-
-    return halfEdge;
-}
-
 // execute all the splits in splitsStringArray
 dcel_t*
 executeSplits(dcel_t *dcel, char **splitStringArray) {
@@ -440,67 +289,9 @@ executeSplits(dcel_t *dcel, char **splitStringArray) {
 
         // execute split about edges
         edgeSplit(dcel, startEdgeIndex, endEdgeIndex);
-        //printDcel(dcel);
     }
 
     return dcel;
-}
-
-// print half edges in syntax for visualisation using python
-void printVisual(dcel_t *dcel) {
-
-    int i, initVertIndex;
-    halfEdge_t *currHalfEdge;
-
-    for (i=0; i<dcel->numFaces; i++) {
-
-        currHalfEdge = dcel->facesArray[i].halfEdge;
-        initVertIndex = currHalfEdge->startVertIndex; printf("\n");
-        do {
-
-            printf("@E%d %d %lf %lf %lf %lf\n"
-                   , currHalfEdge->edgeIndex
-                   , currHalfEdge->faceIndex
-                   , dcel->verticesArray[currHalfEdge->startVertIndex].xCoord
-                   , dcel->verticesArray[currHalfEdge->startVertIndex].yCoord
-                   , dcel->verticesArray[currHalfEdge->endVertIndex].xCoord
-                   , dcel->verticesArray[currHalfEdge->endVertIndex].yCoord);
-            currHalfEdge = currHalfEdge->nextHalfEdge;
-
-        } while (currHalfEdge->startVertIndex != initVertIndex);
-    }
-}
-
-// free all half edges in all faces, then free dynamic arrays of vertices, edges and faces
-void freeDcel(dcel_t *dcel) {
-
-    // free the half edges in each face
-    for (int i=0; i<dcel->numFaces; i++) {
-
-        freeFace(dcel->facesArray[i].halfEdge);
-    }
-
-    // free dynamic arrays of vertices, edges and faces
-    free(dcel->verticesArray);
-    free(dcel->edgesArray);
-    free(dcel->facesArray);
-}
-
-// free all half edges in a face
-void freeFace(halfEdge_t *currHalfEdge) {
-
-    halfEdge_t *temp;
-
-    // disconnect the circular linked list into a normal linked list
-    currHalfEdge->prevHalfEdge->nextHalfEdge = NULL;
-
-    // traverse linked list freeing each half edge
-    while (currHalfEdge != NULL) {
-
-        temp = currHalfEdge;
-        currHalfEdge = currHalfEdge->nextHalfEdge;
-        free(temp);
-    }
 }
 
 // return true if midpoint could be inside face half edge belongs too, otherwise return false
@@ -549,3 +340,216 @@ halfEdgeCheck(dcel_t* dcel, halfEdge_t *halfEdge, vertex_t midPoint) {
 
     return 0;
 }
+
+// calculate the midpoint of en edge in the DCEL and return a vertex at that location
+vertex_t
+getEdgeMidPoint(dcel_t *dcel, int edgeIndex) {
+
+    vertex_t midPoint;
+    halfEdge_t *halfEdge = dcel->edgesArray[edgeIndex].halfEdge;
+
+    // get coords of vertices attached to edge
+    double x1 = dcel->verticesArray[halfEdge->startVertIndex].xCoord;
+    double y1 = dcel->verticesArray[halfEdge->startVertIndex].yCoord;
+    double x2 = dcel->verticesArray[halfEdge->endVertIndex].xCoord;
+    double y2 = dcel->verticesArray[halfEdge->endVertIndex].yCoord;
+
+    // set return vertex coords as midpoint
+    midPoint.xCoord = (x1 + x2) / 2;
+    midPoint.yCoord = (y1 + y2) / 2;
+
+    return midPoint;
+}
+
+// return a new vertex at the midpoint between vertex1 and vertex2
+vertex_t
+getVerticesMidPoint(vertex_t vertex1, vertex_t vertex2) {
+
+    vertex_t midPoint;
+
+    // set return vertex coords as midpoint
+    midPoint.xCoord = (vertex1.xCoord + vertex2.xCoord) / 2;
+    midPoint.yCoord = (vertex1.yCoord + vertex2.yCoord) / 2;
+
+    return midPoint;
+}
+
+// set the face index of all half edges in a face
+void
+setFaceIndex(dcel_t *dcel, halfEdge_t *currHalfEdge, int faceIndex) {
+
+    int initVertIndex = currHalfEdge->startVertIndex;
+
+    // traverse circular linked list, set each face index, until returning to the first halfEdge
+    do {
+        currHalfEdge->faceIndex = faceIndex;
+        currHalfEdge = currHalfEdge->nextHalfEdge;
+    } while (currHalfEdge->startVertIndex != initVertIndex);
+}
+
+// malloc a new half edge with next, prev pointers and start, end vertex indices from parameters
+halfEdge_t*
+getHalfEdge(int startVertIndex, int endVertIndex, halfEdge_t *prev, halfEdge_t *next) {
+
+    // allocate memory for new half edge
+    halfEdge_t *halfEdge = (halfEdge_t*)malloc(sizeof(halfEdge_t));
+    assert(halfEdge);
+
+    // set indices and pointers
+    halfEdge->startVertIndex = startVertIndex;
+    halfEdge->endVertIndex = endVertIndex;
+    halfEdge->nextHalfEdge = next;
+    halfEdge->prevHalfEdge = prev;
+    halfEdge->oppositeHalfEdge = NULL;
+
+    // designated garbage value for these indices
+    halfEdge->edgeIndex = -1;
+    halfEdge->faceIndex = -1;
+
+    return halfEdge;
+}
+
+// free all half edges in all faces, then free dynamic arrays of vertices, edges and faces
+void freeDcel(dcel_t *dcel) {
+
+    // free the half edges in each face
+    for (int i=0; i<dcel->numFaces; i++) {
+
+        freeFace(dcel->facesArray[i].halfEdge);
+    }
+
+    // free dynamic arrays of vertices, edges and faces
+    free(dcel->verticesArray);
+    free(dcel->edgesArray);
+    free(dcel->facesArray);
+}
+
+// free all half edges in a face
+void freeFace(halfEdge_t *currHalfEdge) {
+
+    halfEdge_t *temp;
+
+    // disconnect the circular linked list into a normal linked list
+    currHalfEdge->prevHalfEdge->nextHalfEdge = NULL;
+
+    // traverse linked list freeing each half edge
+    while (currHalfEdge != NULL) {
+
+        temp = currHalfEdge;
+        currHalfEdge = currHalfEdge->nextHalfEdge;
+        free(temp);
+    }
+}
+
+//
+// DEBUG FUNCTIONS
+//
+
+// print all information in a DCEL
+void
+printDcel(dcel_t *dcel) {
+
+    int i;
+
+    printf("\ndcel data:\n\n");
+
+    // print array size for array of vertices, edges and faces
+    printf("array size of veritces array: %d\n", (int)dcel->verticesArraySize);
+    printf("array size of edges array: %d\n", (int)dcel->edgesArraySize);
+    printf("array size of faces array: %d\n", (int)dcel->facesArraySize);
+
+    // print number of faces, edges and vertices in the DCEL
+    printf("\n# of faces: %d\n", dcel->numFaces);
+    printf("# of edges: %d\n", dcel->numEdges);
+    printf("# of vertices: %d\n", dcel->numVertices);
+
+    // print info for every face, edge and vertex in the DCEL
+    for (i=0; i<dcel->numFaces; i++) {
+        printFace(dcel, i);
+    }
+
+    for (i=0; i<dcel->numEdges; i++) {
+        printEdge(dcel, i);
+    }
+
+    for (i=0; i<dcel->numVertices; i++) {
+        printVertex(dcel, i);
+    }
+}
+
+// print the indices of every half edge in a face
+void
+printFace(dcel_t* dcel, int faceIndex) {
+
+    halfEdge_t *currHalfEdge = dcel->facesArray[faceIndex].halfEdge;
+    int initVertIndex = currHalfEdge->startVertIndex;
+    printf("\nface index: %d\n\n", faceIndex);
+
+    // print every half edge in a face
+    do {
+        printHalfEdge(dcel, currHalfEdge);
+        currHalfEdge = currHalfEdge->nextHalfEdge;
+        printf("\n");
+    } while (currHalfEdge->startVertIndex != initVertIndex);
+}
+
+// print the indices in a half edge
+void
+printHalfEdge(dcel_t *dcel, halfEdge_t *halfEdge) {
+
+    printf("face index %d\n", halfEdge->faceIndex);
+    printf("edge index: %d\n", halfEdge->edgeIndex);
+    printf("starting "); printVertex(dcel, halfEdge->startVertIndex);
+    printf("ending "); printVertex(dcel, halfEdge->endVertIndex);
+}
+
+// print all half edges at a given edge index
+void
+printEdge(dcel_t *dcel, int edgeIndex) {
+
+    printf("edge at index %d has half edges:\n\n", edgeIndex);
+    printHalfEdge(dcel, dcel->edgesArray[edgeIndex].halfEdge);
+    printf("\n");
+
+    // print twin half edge if it exists
+    if (dcel->edgesArray[edgeIndex].halfEdge->oppositeHalfEdge != NULL) {
+        printHalfEdge(dcel, dcel->edgesArray[edgeIndex].halfEdge->oppositeHalfEdge);
+        printf("\n");
+    }
+}
+// print coordinates of a vertex
+void
+printVertex(dcel_t* dcel, int vertexIndex) {
+
+    printf("vertex x,y = %lf,%lf at index: %d\n",
+           dcel->verticesArray[vertexIndex].xCoord,
+           dcel->verticesArray[vertexIndex].yCoord,
+           vertexIndex);
+}
+
+// print half edges in syntax for visualisation using python
+void printVisual(dcel_t *dcel) {
+
+    int i, initVertIndex;
+    halfEdge_t *currHalfEdge;
+
+    for (i=0; i<dcel->numFaces; i++) {
+
+        currHalfEdge = dcel->facesArray[i].halfEdge;
+        initVertIndex = currHalfEdge->startVertIndex; printf("\n");
+        do {
+
+            printf("@E%d %d %lf %lf %lf %lf\n"
+                   , currHalfEdge->edgeIndex
+                   , currHalfEdge->faceIndex
+                   , dcel->verticesArray[currHalfEdge->startVertIndex].xCoord
+                   , dcel->verticesArray[currHalfEdge->startVertIndex].yCoord
+                   , dcel->verticesArray[currHalfEdge->endVertIndex].xCoord
+                   , dcel->verticesArray[currHalfEdge->endVertIndex].yCoord);
+            currHalfEdge = currHalfEdge->nextHalfEdge;
+
+        } while (currHalfEdge->startVertIndex != initVertIndex);
+    }
+}
+
+

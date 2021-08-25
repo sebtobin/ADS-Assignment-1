@@ -83,17 +83,6 @@ storeWatchtowerStructs(char **watchtowerStringArray, watchtower_t **watchtowerSt
     return watchtowerStructArray;
 }
 
-// print out the contents of the watchtower_t struct
-void
-printWatchtowerStruct(watchtower_t *watchtowerStruct, FILE *file) {
-    fprintf(file, "Watchtower ID: %s, ", watchtowerStruct->watchtowerID);
-    fprintf(file, "Postcode: %s, ", watchtowerStruct->postcode);
-    fprintf(file, "Population Served: %d, ", watchtowerStruct->populationServed);
-    fprintf(file, "Watchtower Point of Contact Name: %s, ", watchtowerStruct->watchtowerName);
-    fprintf(file, "x: %lf, ", watchtowerStruct->longitude);
-    fprintf(file, "y: %lf\n", watchtowerStruct->latitude);
-}
-
 // free all the strings in the watchtower_t structs in
 // an array, the structs and then the array itself
 void
@@ -110,6 +99,21 @@ freeWatchtowerStructArray(watchtower_t ***watchtowerStructArray) {
     // free struct array and set pointer to NULL
     free(*watchtowerStructArray);
     *watchtowerStructArray = NULL;
+}
+
+//
+// DEBUG FUNCTIONS
+//
+
+// print out the contents of the watchtower_t struct
+void
+printWatchtowerStruct(watchtower_t *watchtowerStruct, FILE *file) {
+    fprintf(file, "Watchtower ID: %s, ", watchtowerStruct->watchtowerID);
+    fprintf(file, "Postcode: %s, ", watchtowerStruct->postcode);
+    fprintf(file, "Population Served: %d, ", watchtowerStruct->populationServed);
+    fprintf(file, "Watchtower Point of Contact Name: %s, ", watchtowerStruct->watchtowerName);
+    fprintf(file, "x: %lf, ", watchtowerStruct->longitude);
+    fprintf(file, "y: %lf\n", watchtowerStruct->latitude);
 }
 
 

@@ -18,5 +18,8 @@ typedef struct {
 } watchtower_t;
 
 watchtower_t **storeWatchtowerStructs(char **watchtowerStringArray, watchtower_t **watchtowerStructArray);
-void printWatchtowerStruct(watchtower_t *watchtowerStruct, FILE *file);
 void freeWatchtowerStructArray(watchtower_t ***watchtowerStructArray);
+
+// DEBUG FUNCTION PROTOTYPES
+
+void printWatchtowerStruct(watchtower_t *watchtowerStruct, FILE *file);
