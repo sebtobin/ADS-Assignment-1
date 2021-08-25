@@ -16,5 +16,5 @@ watchtowerOps.o: watchtowerOps.c watchtowerOps.h
 	gcc -Wall -o watchtowerOps.o watchtowerOps.c -c
 
 # cleaning output files
-clean: vorono1
+clean: voronoi1
 	rm *.o voronoi1
