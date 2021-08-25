@@ -1,5 +1,5 @@
 /*
- *
+ * header file for dcelOps.c function prototypes and type definitions
  */
 
 #ifndef COMP20003_ASS1_DCELOPS_H

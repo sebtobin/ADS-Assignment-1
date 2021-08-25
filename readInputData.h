@@ -1,5 +1,5 @@
 /*
- *
+ * header file for readInputData.c function prototypes and type definitions
  */
 
 #ifndef COMP20003_ASS1_READINPUTDATA_H

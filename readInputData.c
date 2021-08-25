@@ -1,4 +1,5 @@
-/* file containing functions for reading text and storing as an
+/*
+ * file containing functions for reading text and storing as an
  * array of strings to be then stored in specialised structures
  */
 
@@ -8,10 +9,13 @@
 #include <assert.h>
 #include "readInputData.h"
 
+//  # defines
+
 #define LINE_BUFFER_SIZE 512
 #define INIT_ARRAY_SIZE 16
+#define MIN_SPLIT_CHARS 3
 
-/* read a file and store each line as a string in an array */
+// read a file and store each line as a string in an array
 char**
 readTextData(FILE *text, char **stringArray) {
 
@@ -26,9 +30,12 @@ readTextData(FILE *text, char **stringArray) {
     // storing each line in the text as a string
     for (i=0; fgets(lineBuffer, LINE_BUFFER_SIZE + 1, text) != NULL; i++) {
 
-        // for edge case where an empty string is passed for no splits
-        // but it actually has a newline character for some reason
-        if (strlen(lineBuffer) < 3) break;
+        // input files are assumed to be well formatted, however weird (bug?)
+        // causes redirection of empty string, as in <<< "", to input a string
+        // which is just a newline character, as such treat this as no string
+        if (strlen(lineBuffer) < MIN_SPLIT_CHARS) {
+            break;
+        }
 
         // allocate more memory if needed
         if (i == arraySize - 1) {
@@ -48,7 +55,7 @@ readTextData(FILE *text, char **stringArray) {
     return stringArray;
 }
 
-/* free all the strings in an array, then the array itself */
+// free all the strings in an array, then the array itself
 void
 freeStringArray(char ***stringArray) {
 

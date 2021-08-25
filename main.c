@@ -1,5 +1,6 @@
 /*
  * Main program for COMP20003 Assignment 1
+ * Contains functions that utilise contents of multiple header files
  */
 
 #include <stdio.h>
@@ -8,16 +9,18 @@
 #include "dcelOps.h"
 #include "main.h"
 
-#define INIT_ARRAY_SIZE 16
+//  # defines
 
-/* main function for the assignment */
+#define INIT_ARRAY_SIZE 4
+
+// main function for the assignment
 int
 main(int argc, char *argv[]) {
 
     int i;
     char **watchtowerStringArray = NULL, **initPolygonStringArray = NULL, **splitStringArray = NULL;
     FILE *CSVData, *initPolygonData, *outputFile;
-    watchtowerData_t **watchtowerStructArray = NULL;
+    watchtower_t **watchtowerStructArray = NULL;
     dcel_t dcel;
 
     /*// print command line args
@@ -80,8 +83,8 @@ main(int argc, char *argv[]) {
     executeSplits(&dcel, splitStringArray);
     freeStringArray(&splitStringArray);
 
-    printVisual(&dcel);
-    //printDcel(&dcel);
+    //printVisual(&dcel);
+    printDcel(&dcel);
 
     outputFile = fopen(argv[3], "w");
     printWatchtowerSummaries(&dcel, watchtowerStructArray, outputFile);
@@ -96,11 +99,13 @@ main(int argc, char *argv[]) {
     return 0;
 }
 
+// function prints summary of watchtower info for each face into outputFile
 void
-printWatchtowerSummaries(dcel_t *dcel, watchtowerData_t **watchtowerStructArray, FILE *outputFile) {
+printWatchtowerSummaries(dcel_t *dcel, watchtower_t **watchtowerStructArray, FILE *outputFile) {
 
     int i, j, populations[dcel->numFaces];
 
+    // iterate through each face
     for (i=0; i<dcel->numFaces; i++) {
 
         fprintf(outputFile, "%d\n", i);
@@ -108,17 +113,24 @@ printWatchtowerSummaries(dcel_t *dcel, watchtowerData_t **watchtowerStructArray,
 
         for (j=0; watchtowerStructArray[j]; j++) {
 
+            // ignore watchtowers that have already been categorised into a different face
             if (watchtowerStructArray[j]->isCategorised) {
                 continue;
             }
+
+            // check if uncategorised watchtowers are within current face
             else if (inFace(watchtowerStructArray[j], dcel, i)) {
+
+                // sum up population, mark as categorised and then print watchtower info to outputFile
                 populations[i] += watchtowerStructArray[j]->populationServed;
                 watchtowerStructArray[j]->isCategorised = 1;
                 printWatchtowerStruct(watchtowerStructArray[j], outputFile);
+
             }
         }
     }
 
+    // print total population info for each face to outputFile
     for (i=0; i<dcel->numFaces; i++) {
 
         fprintf(outputFile, "Face %d population served: %d\n", i, populations[i]);
@@ -126,13 +138,17 @@ printWatchtowerSummaries(dcel_t *dcel, watchtowerData_t **watchtowerStructArray,
     }
 }
 
+// returns true if watchtower is inside face with index faceIndex, else returns false
 int
-inFace(watchtowerData_t *watchtower, dcel_t *dcel, int faceIndex) {
+inFace(watchtower_t *watchtower, dcel_t *dcel, int faceIndex) {
 
     halfEdge_t *curr = dcel->facesArray[faceIndex].halfEdge;
     int initVertIndex = curr->startVertIndex;
+
+    // create vertex at watchtower location
     vertex_t watchtowerPoint = {watchtower->longitude, watchtower->latitude};
 
+    // return false if vertex can't be inside the face of any half edge in the face
     do {
         if (!halfEdgeCheck(dcel, curr, watchtowerPoint)) {
             return 0;

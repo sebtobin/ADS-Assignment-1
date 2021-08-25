@@ -1,5 +1,5 @@
 /*
- *
+ * file containing functions for working with watchtower structs
  */
 
 #include <stdio.h>
@@ -8,21 +8,22 @@
 #include <assert.h>
 #include "watchtowerOps.h"
 
+//  # defines
+
 #define CELL_DELIM ","
 #define INIT_ARRAY_SIZE 16
 
-/* read an array of strings, with each string being a CSV record
- * and store each string in a watchtowerData_t struct
- */
-watchtowerData_t**
-storeWatchtowerStructs(char **watchtowerStringArray, watchtowerData_t **watchtowerStructArray) {
+// read an array of strings, with each string being a CSV record
+// and store each string in a watchtower_t struct
+watchtower_t**
+storeWatchtowerStructs(char **watchtowerStringArray, watchtower_t **watchtowerStructArray) {
 
     int i;
     char *cellBuffer;
     size_t arraySize = INIT_ARRAY_SIZE;
 
     // allocate memory for array of pointers to csv records was structs
-    watchtowerStructArray = (watchtowerData_t**)malloc(sizeof(watchtowerData_t*) * arraySize);
+    watchtowerStructArray = (watchtower_t**)malloc(sizeof(watchtower_t*) * arraySize);
     assert(watchtowerStructArray);
 
     // if string array is not empty, skip CSV header string
@@ -37,19 +38,17 @@ storeWatchtowerStructs(char **watchtowerStringArray, watchtowerData_t **watchtow
         // allocate more memory if needed to array of struct pointers
         if (i == arraySize) {
             arraySize *= 2;
-            watchtowerStructArray = (watchtowerData_t**)realloc(watchtowerStructArray, sizeof(watchtowerData_t*) * arraySize);
+            watchtowerStructArray = (watchtower_t**)realloc(watchtowerStructArray, sizeof(watchtower_t*) * arraySize);
             assert(watchtowerStructArray);
         }
 
         // allocate memory to current watchtower struct pointer
-        watchtowerStructArray[i] = (watchtowerData_t*)malloc(sizeof(watchtowerData_t));
+        watchtowerStructArray[i] = (watchtower_t*)malloc(sizeof(watchtower_t));
         assert(watchtowerStructArray[i]);
 
-        /* hardcode storing of each cell into corresponding struct variables;
-         * seems as though some level of hard coding is required to store cell
-         * data into the struct, without significantly more complex code such as
-         * a 2D matrix and array of dictionaries with constant keys
-        */
+        // hardcode storing of each cell into corresponding struct variables;
+        // seems as though some level of hard coding is required to store cell
+        // data into the struct, without significantly more complex code
 
         cellBuffer = strtok(watchtowerStringArray[i], CELL_DELIM);
         watchtowerStructArray[i]->watchtowerID = (char*)malloc(sizeof(char) * (strlen(cellBuffer) + 1));
@@ -84,9 +83,9 @@ storeWatchtowerStructs(char **watchtowerStringArray, watchtowerData_t **watchtow
     return watchtowerStructArray;
 }
 
-/* print out the contents of the watchtowerData_t struct */
+// print out the contents of the watchtower_t struct
 void
-printWatchtowerStruct(watchtowerData_t *watchtowerStruct, FILE *file) {
+printWatchtowerStruct(watchtower_t *watchtowerStruct, FILE *file) {
     fprintf(file, "Watchtower ID: %s, ", watchtowerStruct->watchtowerID);
     fprintf(file, "Postcode: %s, ", watchtowerStruct->postcode);
     fprintf(file, "Population Served: %d, ", watchtowerStruct->populationServed);
@@ -95,11 +94,10 @@ printWatchtowerStruct(watchtowerData_t *watchtowerStruct, FILE *file) {
     fprintf(file, "y: %lf\n", watchtowerStruct->latitude);
 }
 
-/* free all the strings in the watchtowerData_t structs in an array,
- * the structs and then the array itself
- */
+// free all the strings in the watchtower_t structs in
+// an array, the structs and then the array itself
 void
-freeWatchtowerStructArray(watchtowerData_t ***watchtowerStructArray) {
+freeWatchtowerStructArray(watchtower_t ***watchtowerStructArray) {
 
     // free each struct pointer and strings within
     for (int i=0; (*watchtowerStructArray)[i] != NULL; i++) {
@@ -114,15 +112,4 @@ freeWatchtowerStructArray(watchtowerData_t ***watchtowerStructArray) {
     *watchtowerStructArray = NULL;
 }
 
-/* get the number of watchtowers in watchtower pointer array */
-int
-numWatchtowers(watchtowerData_t **watchtowersArray) {
 
-    int i;
-
-    // iterate through watchtower pointers until null pointers
-    for (i=0; watchtowersArray[i] != NULL; i++) {
-    }
-
-    return i;
-}

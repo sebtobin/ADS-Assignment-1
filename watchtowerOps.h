@@ -1,5 +1,5 @@
 /*
- *
+ * header file for watchtower.c function prototypes and type definitions
  */
 
 #ifndef COMP20003_ASS1_WATCHTOWEROPS_H
@@ -15,9 +15,8 @@ typedef struct {
     double longitude;
     double latitude;
     int isCategorised;
-} watchtowerData_t;
+} watchtower_t;
 
-watchtowerData_t **storeWatchtowerStructs(char **watchtowerStringArray, watchtowerData_t **watchtowerStructArray);
-void printWatchtowerStruct(watchtowerData_t *watchtowerStruct, FILE *file);
-void freeWatchtowerStructArray(watchtowerData_t ***watchtowerStructArray);
-int numWatchtowers(watchtowerData_t **watchtowersArray);
+watchtower_t **storeWatchtowerStructs(char **watchtowerStringArray, watchtower_t **watchtowerStructArray);
+void printWatchtowerStruct(watchtower_t *watchtowerStruct, FILE *file);
+void freeWatchtowerStructArray(watchtower_t ***watchtowerStructArray);
