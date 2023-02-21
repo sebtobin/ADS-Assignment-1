@@ -1,4 +1,4 @@
-# COMP20003-ass1
+# COMP20003 Algorithms and Data Structures Assignment 1
 
 ### `voronoi1.c / voronoi1.h`
 Main program with main function 
@@ -11,6 +11,10 @@ For storing watchtower Data in array of struct pointers
 
 ### `dcelOps.c / dcelOps.h`
 For creating a DCEL and storing the initial polygon as a DCEL and executing splits
+
+<br>
+
+<i>Keeping this on my GitHub as like a time capsule</i>
 
 
 
